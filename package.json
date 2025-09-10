@@ -1,9 +1,14 @@
 {
   "name": "si2-mono",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "turbo run dev --parallel",
+    "dev": "npm run dev:web",
+    "dev:web": "npm run dev -w @si2/web",
+    "dev:all": "turbo run dev --parallel",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "format": "turbo run format"
@@ -11,5 +16,9 @@
   "devDependencies": {
     "turbo": "^2.0.0"
   },
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "tailwindcss": "^4.1.13"
+  }
 }
