@@ -1,0 +1,11 @@
+{
+  "name": "@si2/mobile",
+  "private": true,
+  "scripts": {
+    "dev": "flutter run -d chrome --web-port=5174",
+    "android": "flutter run -d android",
+    "ios": "flutter run -d ios",
+    "build:web": "flutter build web",
+    "build:apk": "flutter build apk --release"
+  }
+}

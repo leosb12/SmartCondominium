@@ -1,0 +1,10 @@
+{
+  "name": "@si2/backend",
+  "private": true,
+  "scripts": {
+    "dev": "python manage.py runserver 8001",
+    "migrate": "python manage.py migrate",
+    "createsuperuser": "python manage.py createsuperuser",
+    "collect": "python manage.py collectstatic --noinput"
+  }
+}
