@@ -2,9 +2,9 @@
   "name": "@si2/mobile",
   "private": true,
   "scripts": {
-    "dev": "flutter run -d chrome --web-port=5174",
+    "dev": "flutter run -d web-server --web-hostname=localhost --web-port=5177",
     "android": "flutter run -d android",
-    "ios": "flutter run -d ios",
+    "windows": "flutter run -d windows",
     "build:web": "flutter build web",
     "build:apk": "flutter build apk --release"
   }
