@@ -49,12 +49,14 @@ export function Header() {
           </div>
 
           <div className="flex space-x-3">
-            <button
-              className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg transition cursor-pointer"
-            >
-              Iniciar sesión
-            </button>
-            {/* Botón "Demo" eliminado */}
+              <a
+                href="/login"
+                className="border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white px-4 py-2 rounded-lg transition cursor-pointer inline-block"
+              >
+                Iniciar sesión
+              </a>
+
+
           </div>
         </div>
       </div>
