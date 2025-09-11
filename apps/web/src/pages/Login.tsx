@@ -15,8 +15,10 @@ export default function Login() {
       console.log("Login exitoso:", res.data);
       // localStorage.setItem("token", res.data.token)
     } catch (err: any) {
-      setError(err.response?.data?.error || "Error al iniciar sesión");
-    } finally {
+      console.error("Error en login:", err); //
+      setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
+    }
+finally {
       setLoading(false);
     }
   };
