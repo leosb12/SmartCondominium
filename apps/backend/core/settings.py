@@ -38,7 +38,7 @@ INSTALLED_APPS = [
 
 # ====== Middleware ======
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # CORS primero
+    "corsheaders.middleware.CorsMiddleware",  # 👈 CORS primero
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -99,3 +99,12 @@ STATIC_URL = "static/"
 
 # ====== Primary Key por defecto ======
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ====== CORS ======
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5175",
+    "http://127.0.0.1:5175",
+]
+
+# 👉 Si prefieres permitir todos los orígenes en desarrollo:
+# CORS_ALLOW_ALL_ORIGINS = True

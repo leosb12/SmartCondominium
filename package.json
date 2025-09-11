@@ -5,8 +5,9 @@
     "apps/*",
     "packages/*"
   ],
-"scripts": {
-  "dev": "turbo run dev --parallel",
+ "scripts": {
+  "dev": "npm run dev:web",
+  "dev:all": "turbo run dev --parallel",
   "dev:web": "npm run dev -w @si2/web",
   "dev:backend": "npm run dev -w @si2/backend",
   "dev:mobile": "npm run dev -w @si2/mobile",
@@ -21,6 +22,7 @@
   "packageManager": "npm@10.9.2",
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
+    "react-router-dom": "^7.8.2",
     "tailwindcss": "^4.1.13"
   }
 }
