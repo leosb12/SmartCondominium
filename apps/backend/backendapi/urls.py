@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import ping
-
+from backendapi import views
 urlpatterns = [
-    path('ping/', ping, name='ping'),
+    path("login/", views.login, name="login"),
 ]

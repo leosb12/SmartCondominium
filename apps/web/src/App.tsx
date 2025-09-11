@@ -1,5 +1,14 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
 
 export default function App() {
-  return <Home />;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />      {/* Ruta principal */}
+        <Route path="/login" element={<Login />} /> {/* Ruta de login */}
+      </Routes>
+    </BrowserRouter>
+  );
 }
