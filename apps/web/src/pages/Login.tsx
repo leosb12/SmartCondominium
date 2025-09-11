@@ -15,10 +15,9 @@ export default function Login() {
       console.log("Login exitoso:", res.data);
       // localStorage.setItem("token", res.data.token)
     } catch (err: any) {
-      console.error("Error en login:", err); //
+      console.error("Error en login:", err);
       setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
-    }
-finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -64,12 +63,18 @@ finally {
           </button>
         </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-2">
           <a
             href="#"
-            className="text-blue-400 hover:text-blue-300 text-sm transition"
+            className="block text-blue-400 hover:text-blue-300 text-sm transition"
           >
             ¿Olvidaste tu contraseña?
+          </a>
+          <a
+            href="/register"
+            className="block text-gray-400 hover:text-blue-300 text-sm transition"
+          >
+            ¿No tienes cuenta? <span className="text-blue-400 font-semibold">Regístrate</span>
           </a>
         </div>
       </div>
