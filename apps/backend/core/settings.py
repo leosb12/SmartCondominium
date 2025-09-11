@@ -71,7 +71,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # ====== Base de Datos ======
-# En local usa variables .env, en Render usa DATABASE_URL automáticamente
 DATABASES = {
     "default": dj_database_url.config(
         default=env.db_url("DATABASE_URL", default="postgres://postgres:postgres@localhost:5432/postgres"),
@@ -96,8 +95,6 @@ USE_TZ = True
 # ====== Archivos estáticos ======
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-# Whitenoise: servir archivos con compresión
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # ====== Primary Key por defecto ======
@@ -105,10 +102,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # ====== CORS ======
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5175",   # desarrollo local
+    "http://localhost:5173",   # desarrollo local (Vite default)
+    "http://127.0.0.1:5173",
+    "http://localhost:5175",   # en caso de que uses este puerto
     "http://127.0.0.1:5175",
-    "https://tusmartcondominium.vercel.app",  # 👈 frontend en Vercel
+    "https://smart-condominium-web.vercel.app",  # 👈 dominio real en Vercel
 ]
 
-# 👉 Si quieres permitir todos los orígenes (no recomendado en prod):
+# 👉 Solo para debug: permitir todos (desactivar en prod)
 # CORS_ALLOW_ALL_ORIGINS = True
