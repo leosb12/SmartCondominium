@@ -65,9 +65,7 @@ const Home: React.FC = () => {
                       <p className="text-blue-100 text-xs sm:text-sm">Operación de áreas comunes</p>
                       <p className="text-white font-semibold text-sm sm:text-base">Control y trazabilidad</p>
                     </div>
-                    <span className="hidden sm:inline px-2 py-1 rounded-md text-xs bg-white/10 text-white backdrop-blur">
-                      Imagen ilustrativa
-                    </span>
+
                   </div>
                 </div>
               </div>
