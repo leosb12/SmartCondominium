@@ -71,12 +71,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "core.wsgi.application"
 
 # ====== Base de Datos ======
+# ====== Base de Datos ======
 DATABASES = {
     "default": dj_database_url.config(
-        default=env.db_url("DATABASE_URL", default="postgres://postgres:postgres@localhost:5432/postgres"),
+        default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
     )
 }
+
+
 
 # ====== Validaciones de Password ======
 AUTH_PASSWORD_VALIDATORS = [
