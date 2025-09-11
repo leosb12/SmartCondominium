@@ -5,14 +5,16 @@
     "apps/*",
     "packages/*"
   ],
-  "scripts": {
-    "dev": "npm run dev:web",
-    "dev:web": "npm run dev -w @si2/web",
-    "dev:all": "turbo run dev --parallel",
-    "build": "turbo run build",
-    "lint": "turbo run lint",
-    "format": "turbo run format"
-  },
+"scripts": {
+  "dev": "turbo run dev --parallel",
+  "dev:web": "npm run dev -w @si2/web",
+  "dev:backend": "npm run dev -w @si2/backend",
+  "dev:mobile": "npm run dev -w @si2/mobile",
+  "build": "turbo run build",
+  "lint": "turbo run lint",
+  "format": "turbo run format"
+},
+
   "devDependencies": {
     "turbo": "^2.0.0"
   },
