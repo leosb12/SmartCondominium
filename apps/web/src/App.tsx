@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 export default function App() {
   return (
@@ -10,6 +12,8 @@ export default function App() {
         <Route path="/" element={<Home />} />      {/* Ruta principal */}
         <Route path="/login" element={<Login />} /> {/* Ruta de login */}
         <Route path="/register" element={<Register />} /> {/* Ruta de Register */}
+        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Ruta de recuperación */}
+        <Route path="/reset-password" element={<ResetPassword />} /> {/* Ruta de reset */}
       </Routes>
     </BrowserRouter>
   );
