@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { api } from "../services/api";
 
 export default function Login() {
@@ -64,18 +65,18 @@ export default function Login() {
         </div>
 
         <div className="mt-6 text-center space-y-2">
-          <a
-            href="#"
+          <Link
+            to="/forgot-password"
             className="block text-blue-400 hover:text-blue-300 text-sm transition"
           >
             ¿Olvidaste tu contraseña?
-          </a>
-          <a
-            href="/register"
+          </Link>
+          <Link
+            to="/register"
             className="block text-gray-400 hover:text-blue-300 text-sm transition"
           >
             ¿No tienes cuenta? <span className="text-blue-400 font-semibold">Regístrate</span>
-          </a>
+          </Link>
         </div>
       </div>
     </div>
