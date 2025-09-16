@@ -11,20 +11,17 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />      {/* Ruta principal */}
-        <Route path="/login" element={<Login />} /> {/* Ruta de login */}
-        <Route path="/register" element={<Register />} /> {/* Ruta de Register */}
-        <Route path="/forgot-password" element={<ForgotPassword />} /> {/* Ruta de recuperación */}
-        <Route path="/reset-password" element={<ResetPassword />} /> {/* Ruta de reset */}
+        {/* Públicas */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+        {/* Privadas */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

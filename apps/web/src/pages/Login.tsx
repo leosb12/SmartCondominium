@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { api } from "../services/api";
 
-import { supabase } from "../lib/supabaseClient";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -15,30 +15,25 @@ const handleLogin = async () => {
     setLoading(true);
     setError("");
 
-    // login directo en Supabase
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const res = await api.post("/login/", { email, password });
 
-    if (error) {
-      setError(error.message);
-      return;
+    if (res.data.success) {
+      localStorage.setItem("access_token", res.data.access_token);
+      localStorage.setItem("refresh_token", res.data.refresh_token);
+
+      navigate("/dashboard", { replace: true });
+
+    } else {
+      setError(res.data.error || "Credenciales inválidas");
     }
-
-    console.log("Login exitoso:", data);
-
-    // (opcional) guarda token de supabase si quieres pasar a tu API Django
-    localStorage.setItem("sb-access-token", data.session?.access_token || "");
-
-    navigate("/dashboard");
   } catch (err: any) {
     console.error("Error en login:", err);
-    setError(err.message || "Error al iniciar sesión");
+    setError(err.response?.data?.error || "Error al iniciar sesión");
   } finally {
     setLoading(false);
   }
 };
+
 
 
   return (
