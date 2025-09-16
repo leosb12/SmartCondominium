@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
-import { supabase } from "../lib/supabaseClient";
+
 
 export default function Register() {
   const navigate = useNavigate();
@@ -38,81 +38,58 @@ export default function Register() {
     return "";
   };
 
-  const handleRegister = async () => {
-    const v = validate();
-    if (v) {
-      setError(v);
-      setSuccess("");
-      return;
-    }
+const handleRegister = async () => {
+  const v = validate();
+  if (v) {
+    setError(v);
+    setSuccess("");
+    return;
+  }
 
+  try {
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    const payload = {
+      email: form.email.trim(),
+      password: form.password,
+      nombre: form.nombre.trim(),
+      apellido: form.apellido.trim(),
+      telefono: form.telefono.trim(),
+      fecha_nacimiento: form.fecha_nacimiento || null,
+    };
+
+    // 1) Registrar en tu backend
+    const res = await api.post("/register/", payload);
+    console.log("Registro exitoso:", res.data);
+
+    setSuccess("Usuario registrado correctamente. Revisa tu correo para confirmar la cuenta.");
+
+    // 2) Intento de auto-login (opcional)
     try {
-      setLoading(true);
-      setError("");
-      setSuccess("");
+      const loginRes = await api.post("/login/", {
+        email: payload.email,
+        password: payload.password,
+      });
 
-      const payload = {
-        email: form.email.trim(),
-        password: form.password,
-        nombre: form.nombre.trim(),
-        apellido: form.apellido.trim(),
-        telefono: form.telefono.trim(),
-        fecha_nacimiento: form.fecha_nacimiento || null,
-      };
+      localStorage.setItem("access_token", loginRes.data.access_token);
+      localStorage.setItem("refresh_token", loginRes.data.refresh_token);
 
-      // 1) Registrar en tu backend
-      const res = await api.post("/register/", payload);
-      console.log("Registro exitoso:", res.data);
-
-      // ✅ Muestra solo tu mensaje verde
-      setSuccess("Usuario registrado correctamente. Revisa tu correo para confirmar la cuenta.");
-
-      // 2) Intento de auto-login (opcional)
-      try {
-        const loginRes = await api.post("/login/", {
-          email: payload.email,
-          password: payload.password,
-        });
-
-        const { access_token, refresh_token, token } = loginRes.data;
-
-        // 3) Instalar sesión de Supabase en el navegador
-        const { error: sErr } = await supabase.auth.setSession({
-          access_token,
-          refresh_token,
-        });
-        if (sErr) {
-          // No ensucies con error; deja el mensaje verde
-          console.warn("No se pudo iniciar sesión automáticamente:", sErr.message);
-          // Puedes redirigir al login si prefieres:
-          // navigate("/login");
-          return;
-        }
-
-        if (token) localStorage.setItem("token", token);
-
-        // 4) Redirigir al dashboard si el auto-login funcionó
-        navigate("/dashboard", { replace: true });
-      } catch (e: any) {
-        // Si el backend devuelve “email not confirmed” u otro 401,
-        // NO muestres cartel rojo: deja solo el verde y manda al login.
-        const msg = e?.response?.data?.error?.toString().toLowerCase() || "";
-        if (msg.includes("confirm")) {
-          console.info("Login bloqueado por email no confirmado. Mostrando solo mensaje verde.");
-        } else {
-          console.info("No se pudo hacer auto-login:", msg || e.message);
-        }
-        // Redirige al login luego de unos segundos o inmediato:
-        setTimeout(() => navigate("/login"), 1200);
-      }
-    } catch (err: any) {
-      console.error("Error en register:", err);
-      setSuccess("");
-      setError(err?.response?.data?.error || err?.message || "Error al registrarse");
-    } finally {
-      setLoading(false);
+      navigate("/dashboard", { replace: true });
+    } catch (e: any) {
+      console.info("No se pudo hacer auto-login, redirigiendo al login...");
+      setTimeout(() => navigate("/login"), 1200);
     }
-  };
+  } catch (err: any) {
+    console.error("Error en register:", err);
+    setSuccess("");
+    setError(err?.response?.data?.error || err?.message || "Error al registrarse");
+  } finally {
+    setLoading(false);
+  }
+};
+;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
