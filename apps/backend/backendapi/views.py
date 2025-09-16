@@ -1,226 +1,179 @@
+# backendapi/views.py
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from core.supabase_client import supabase
+import re
+import time
+from core.supabase_client import supabase, supabase_admin  # anon + service role
+
+def ok(data, code=200):
+    return JsonResponse(data, status=code, safe=False)
+
+def bad(msg, code=400):
+    return JsonResponse({"success": False, "error": msg}, status=code)
 
 @csrf_exempt
 def login(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            email = data.get("email")
-            password = data.get("password")
+    if request.method != "POST":
+        return bad("Método no permitido", 405)
+    try:
+        data = json.loads(request.body)
+        email = (data.get("email") or "").strip()
+        password = (data.get("password") or "").strip()
 
-            # Autenticación con Supabase
-            res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        if not email or not password:
+            return bad("Email y contraseña son obligatorios", 400)
 
-            if res.user:
-                return JsonResponse({
-                    "success": True,
-                    "user": res.user.email,
-                    "access_token": res.session.access_token,
-                    "refresh_token": res.session.refresh_token
-                }, status=200)
-            else:
-                return JsonResponse({"success": False, "error": "Credenciales inválidas"}, status=401)
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=400)
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+        # Autenticación con Supabase (anon)
+        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        if not res or not res.session:
+            return bad("Credenciales inválidas", 401)
+
+        session = res.session
+        return ok({
+            "success": True,
+            "user": session.user.email,
+            "access_token": session.access_token,
+            "refresh_token": session.refresh_token,
+        })
+    except Exception as e:
+        return bad(str(e), 500)
 
 
 @csrf_exempt
 def register(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            email = data.get("email")
-            password = data.get("password")
-            nombre = data.get("nombre")
-            apellido = data.get("apellido")
-            telefono = data.get("telefono")
-            fecha_nacimiento = data.get("fecha_nacimiento")  # formato "YYYY-MM-DD"
+    """
+    Crea usuario en Supabase Auth (con metadatos) y
+    ACTUALIZA su fila en public.profiles (el trigger la crea vacía).
+    """
+    if request.method != "POST":
+        return bad("Método no permitido", 405)
+    try:
+        data = json.loads(request.body)
 
-            if not email or not password:
-                return JsonResponse(
-                    {"success": False, "error": "Email y password son requeridos"},
-                    status=400,
-                )
+        email    = (data.get("email") or "").strip()
+        pwd      = (data.get("password") or "").strip()
+        nombre   = (data.get("nombre") or "").strip()
+        apellido = (data.get("apellido") or "").strip()
+        telefono = (data.get("telefono") or "").strip()
+        fecnac   = (data.get("fecha_nacimiento") or "").strip()  # "YYYY-MM-DD"
 
-            # Registro en Supabase con user_metadata
-            res = supabase.auth.sign_up({
-                "email": email,
-                "password": password,
-                "options": {
-                    "data": {
-                        "nombre": nombre,
-                        "apellido": apellido,
-                        "telefono": telefono,
-                        "fecha_nacimiento": fecha_nacimiento,
-                    }
+        if not email or not pwd:
+            return bad("Email y contraseña son obligatorios", 400)
+
+        # Validación simple de email
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_regex, email):
+            return bad("Formato de email inválido", 400)
+
+        # 1) Crear usuario en Auth con metadatos (anon client)
+        res = supabase.auth.sign_up({
+            "email": email,
+            "password": pwd,
+            "options": {
+                "data": {
+                    "first_name": nombre,
+                    "last_name":  apellido,
+                    "full_name":  f"{nombre} {apellido}".strip(),
+                    "phone":      telefono,
+                    "birthdate":  fecnac,
                 }
-            })
+            }
+        })
+        if not res or not res.user:
+            return bad("No se pudo registrar el usuario", 400)
 
-            if res.user:
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": "Usuario registrado correctamente. Revise su correo para confirmar.",
-                        "user": res.user.email,
-                        "id": res.user.id,
-                        "metadata": res.user.user_metadata,  # para verificar que se guardó
-                    },
-                    status=201,
-                )
-            else:
-                return JsonResponse(
-                    {"success": False, "error": "No se pudo registrar el usuario"},
-                    status=400,
-                )
+        user_id = res.user.id
 
-        except Exception as e:
-            return JsonResponse({"success": False, "error": str(e)}, status=400)
+        # 2) Esperar a que el TRIGGER cree la fila en public.profiles (muy rápido, pero por si acaso)
+        #    Usamos supabase_admin para saltar RLS desde el backend.
+        attempts = 0
+        max_attempts = 10
+        while attempts < max_attempts:
+            sel = supabase_admin.table("profiles").select("id").eq("id", user_id).execute()
+            if sel.data:
+                break
+            attempts += 1
+            time.sleep(0.15)  # 150ms
+        # Si aún no existe, igual hacemos upsert para estar 100% cubiertos
+        # (en teoría el trigger ya la creó; esto es un safety net).
+        supabase_admin.table("profiles").upsert({
+            "id": user_id,
+            "first_name": nombre,
+            "last_name": apellido,
+            "phone": telefono,
+            "birthdate": fecnac or None,
+        }).execute()
 
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+        return ok({
+            "success": True,
+            "message": "Usuario registrado correctamente. Revisa tu correo si la verificación está activa.",
+            "user_id": user_id,
+            "email": email,
+        }, 201)
+
+    except Exception as e:
+        return bad(str(e), 500)
 
 
 @csrf_exempt
 def forgot_password(request):
-    """
-    Endpoint para solicitar el restablecimiento de contraseña.
-    Envía un correo de recuperación al email proporcionado si existe en Supabase.
-    """
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            email = data.get("email")
+    if request.method != "POST":
+        return bad("Método no permitido", 405)
+    try:
+        data = json.loads(request.body)
+        email = (data.get("email") or "").strip()
+        if not email:
+            return bad("El email es requerido", 400)
 
-            if not email:
-                return JsonResponse(
-                    {"success": False, "error": "El email es requerido"},
-                    status=400,
-                )
+        email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_regex, email):
+            return bad("Formato de email inválido", 400)
 
-            # Validar formato de email básico
-            import re
-            email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-            if not re.match(email_regex, email):
-                return JsonResponse(
-                    {"success": False, "error": "Formato de email inválido"},
-                    status=400,
-                )
+        redirect_url = "http://localhost:5173/reset-password"  # cámbialo en prod
+        supabase.auth.reset_password_for_email(email, {"redirect_to": redirect_url})
 
-            # URL de redirección para el frontend - PRODUCCIÓN
-            redirect_url = "https://smart-condominium-web.vercel.app/reset-password"
-            
-            # Solicitar reset de contraseña a Supabase
-            # Nota: Supabase puede usar diferentes formatos para los tokens
-            res = supabase.auth.reset_password_email(
-                email,
-                {
-                    "redirect_to": redirect_url
-                }
-            )
-
-            # Supabase siempre devuelve éxito por seguridad, 
-            # independientemente de si el email existe o no
-            return JsonResponse(
-                {
-                    "success": True,
-                    "message": "Si el correo existe en nuestro sistema, se ha enviado un enlace de recuperación."
-                },
-                status=200,
-            )
-
-        except Exception as e:
-            return JsonResponse(
-                {"success": False, "error": "Error interno del servidor"}, 
-                status=500
-            )
-
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+        return ok({
+            "success": True,
+            "message": "Si el correo existe, se envió un enlace de recuperación."
+        })
+    except Exception as e:
+        return bad(str(e), 500)
 
 
 @csrf_exempt
 def reset_password(request):
-    """
-    Endpoint para confirmar el restablecimiento de contraseña.
-    Utiliza el token de recuperación para cambiar la contraseña.
-    """
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            access_token = data.get("access_token")
-            refresh_token = data.get("refresh_token")
-            token = data.get("token")  # Token único de Supabase
-            new_password = data.get("new_password")
+    if request.method != "POST":
+        return bad("Método no permitido", 405)
+    try:
+        data = json.loads(request.body)
+        access_token  = data.get("access_token")
+        refresh_token = data.get("refresh_token")
+        token         = data.get("token")
+        new_password  = (data.get("new_password") or "").strip()
 
-            if not new_password:
-                return JsonResponse(
-                    {"success": False, "error": "new_password es requerido"},
-                    status=400,
-                )
+        if not new_password:
+            return bad("new_password es requerido", 400)
+        if len(new_password) < 6:
+            return bad("La contraseña debe tener al menos 6 caracteres", 400)
 
-            # Verificar que tengamos tokens (ya sea formato JWT o token único)
-            if not ((access_token and refresh_token) or token):
-                return JsonResponse(
-                    {
-                        "success": False, 
-                        "error": "Se requiere: (access_token y refresh_token) O token único"
-                    },
-                    status=400,
-                )
+        if token:
+            res = supabase.auth.verify_otp({
+                "token_hash": token,
+                "type": "recovery"
+            })
+        else:
+            if not (access_token and refresh_token):
+                return bad("Faltan tokens para establecer la sesión de recuperación", 400)
+            res = supabase.auth.set_session(access_token, refresh_token)
 
-            # Validar que la contraseña tenga al menos 6 caracteres
-            if len(new_password) < 6:
-                return JsonResponse(
-                    {
-                        "success": False, 
-                        "error": "La contraseña debe tener al menos 6 caracteres"
-                    },
-                    status=400,
-                )
+        if not res or not res.user:
+            return bad("Token de recuperación inválido o expirado", 401)
 
-            # Manejar diferentes tipos de tokens
-            if token:
-                # Usar token único de Supabase (formato del email)
-                res = supabase.auth.verify_otp({
-                    "token_hash": token,
-                    "type": "recovery"
-                })
-            else:
-                # Usar tokens JWT (access_token + refresh_token)
-                res = supabase.auth.set_session(access_token, refresh_token)
-            
-            if not res.user:
-                return JsonResponse(
-                    {"success": False, "error": "Token de recuperación inválido o expirado"},
-                    status=401,
-                )
+        upd = supabase.auth.update_user({"password": new_password})
+        if not upd or not upd.user:
+            return bad("No se pudo actualizar la contraseña", 400)
 
-            # Actualizar la contraseña
-            update_res = supabase.auth.update_user({"password": new_password})
-            
-            if update_res.user:
-                return JsonResponse(
-                    {
-                        "success": True,
-                        "message": "Contraseña actualizada exitosamente"
-                    },
-                    status=200,
-                )
-            else:
-                return JsonResponse(
-                    {"success": False, "error": "No se pudo actualizar la contraseña"},
-                    status=400,
-                )
-
-        except Exception as e:
-            # Para debugging - mostrar error específico
-            print(f"Error en reset_password: {str(e)}")
-            print(f"Tipo de error: {type(e)}")
-            return JsonResponse(
-                {"success": False, "error": f"Error interno del servidor: {str(e)}"}, 
-                status=500
-            )
-
-    return JsonResponse({"error": "Método no permitido"}, status=405)
+        return ok({"success": True, "message": "Contraseña actualizada exitosamente"})
+    except Exception as e:
+        return bad(str(e), 500)

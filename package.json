@@ -5,18 +5,19 @@
     "apps/*",
     "packages/*"
   ],
- "scripts": {
-  "dev": "npm run dev:web",
-  "dev:all": "turbo run dev --parallel",
-  "dev:web": "npm run dev -w @si2/web",
-  "dev:backend": "npm run dev -w @si2/backend",
-  "dev:mobile": "npm run dev -w @si2/mobile",
-  "build": "turbo run build",
-  "lint": "turbo run lint",
-  "format": "turbo run format"
-},
-
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:all": "turbo run dev --parallel",
+    "dev:web": "npm run dev -w @si2/web",
+    "dev:backend": "npm run dev -w @si2/backend",
+    "dev:mobile": "npm run dev -w @si2/mobile",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "format": "turbo run format"
+  },
   "devDependencies": {
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
     "turbo": "^2.0.0"
   },
   "packageManager": "npm@10.9.2",
