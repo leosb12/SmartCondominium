@@ -1,7 +1,7 @@
-import React from "react";
+
 import { Header } from "../ui/Header";
 
-const Home: React.FC = () => {
+export default function Home(){
   return (
     <div className="bg-black text-white font-sans antialiased">
       <Header />
@@ -26,8 +26,8 @@ const Home: React.FC = () => {
               Panel de Administración
             </h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-300 mb-6 sm:mb-8 max-w-3xl mx-auto">
-              Herramientas para gestionar residentes, finanzas, seguridad y operaciones.
-              Acceso exclusivo para administradores.
+              Herramientas para gestionar residentes, finanzas, seguridad y
+              operaciones. Acceso exclusivo para administradores.
             </p>
 
             {/* Botones */}
@@ -62,10 +62,13 @@ const Home: React.FC = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
                   <div className="absolute bottom-3 sm:bottom-4 left-4 right-4 flex items-center justify-between">
                     <div className="text-left">
-                      <p className="text-blue-100 text-xs sm:text-sm">Operación de áreas comunes</p>
-                      <p className="text-white font-semibold text-sm sm:text-base">Control y trazabilidad</p>
+                      <p className="text-blue-100 text-xs sm:text-sm">
+                        Operación de áreas comunes
+                      </p>
+                      <p className="text-white font-semibold text-sm sm:text-base">
+                        Control y trazabilidad
+                      </p>
                     </div>
-
                   </div>
                 </div>
               </div>
@@ -82,8 +85,12 @@ const Home: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-10 animate-fade-in-up">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Funciones principales</h2>
-            <p className="text-gray-300 text-sm sm:text-base">Acciones operativas del día a día</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+              Funciones principales
+            </h2>
+            <p className="text-gray-300 text-sm sm:text-base">
+              Acciones operativas del día a día
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
@@ -151,8 +158,12 @@ const Home: React.FC = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8 sm:mb-10">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">Seguridad con IA</h2>
-            <p className="text-gray-300 text-sm sm:text-base">Módulos de vigilancia y control automatizados</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
+              Seguridad con IA
+            </h2>
+            <p className="text-gray-300 text-sm sm:text-base">
+              Módulos de vigilancia y control automatizados
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
@@ -161,7 +172,9 @@ const Home: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
                 Reconocimiento facial
               </h3>
-              <p className="text-gray-300 text-sm sm:text-base">Validación de residentes autorizados en accesos.</p>
+              <p className="text-gray-300 text-sm sm:text-base">
+                Validación de residentes autorizados en accesos.
+              </p>
             </div>
 
             <div className="group bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-5 sm:p-6 hover:border-blue-500/50 transition">
@@ -169,7 +182,9 @@ const Home: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
                 Visitantes no registrados
               </h3>
-              <p className="text-gray-300 text-sm sm:text-base">Detección y registro automático de visitantes.</p>
+              <p className="text-gray-300 text-sm sm:text-base">
+                Detección y registro automático de visitantes.
+              </p>
             </div>
 
             <div className="group bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-5 sm:p-6 hover:border-blue-500/50 transition">
@@ -177,7 +192,9 @@ const Home: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
                 Lectura de placas (LPR/OCR)
               </h3>
-              <p className="text-gray-300 text-sm sm:text-base">Identificación vehicular y trazabilidad de accesos.</p>
+              <p className="text-gray-300 text-sm sm:text-base">
+                Identificación vehicular y trazabilidad de accesos.
+              </p>
             </div>
 
             <div className="group bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-5 sm:p-6 hover:border-blue-500/50 transition">
@@ -186,7 +203,8 @@ const Home: React.FC = () => {
                 Alertas inteligentes
               </h3>
               <p className="text-gray-300 text-sm sm:text-base">
-                Comportamientos sospechosos: perros sueltos/necesidades, vehículos mal estacionados, etc.
+                Comportamientos sospechosos: perros sueltos/necesidades,
+                vehículos mal estacionados, etc.
               </p>
             </div>
 
@@ -195,29 +213,39 @@ const Home: React.FC = () => {
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
                 Registro con foto
               </h3>
-              <p className="text-gray-300 text-sm sm:text-base">Ingreso/salida de visitantes con evidencia visual.</p>
+              <p className="text-gray-300 text-sm sm:text-base">
+                Ingreso/salida de visitantes con evidencia visual.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
       {/* ===== Footer / Soporte ===== */}
-      <footer id="contact" className="bg-black border-t border-gray-800 py-10 scroll-mt-24">
+      <footer
+        id="contact"
+        className="bg-black border-t border-gray-800 py-10 scroll-mt-24"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-gray-400">
-              © {new Date().getFullYear()} Smart Condominium — Panel de Administración
+              © {new Date().getFullYear()} Smart Condominium — Panel de
+              Administración
             </p>
             <div className="flex gap-4">
-              <a href="/docs" className="hover:text-blue-500">Documentación</a>
-              <a href="/soporte" className="hover:text-blue-500">Soporte</a>
-              <a href="/estado" className="hover:text-blue-500">Estado del servicio</a>
+              <a href="/docs" className="hover:text-blue-500">
+                Documentación
+              </a>
+              <a href="/soporte" className="hover:text-blue-500">
+                Soporte
+              </a>
+              <a href="/estado" className="hover:text-blue-500">
+                Estado del servicio
+              </a>
             </div>
           </div>
         </div>
       </footer>
     </div>
   );
-};
-
-export default Home;
+}
