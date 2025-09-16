@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { api } from "../services/api";
+import { Link, useNavigate } from "react-router-dom";
+
+import { supabase } from "../lib/supabaseClient";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -8,20 +9,37 @@ export default function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const res = await api.post("/login/", { email, password });
-      console.log("Login exitoso:", res.data);
-      // localStorage.setItem("token", res.data.token)
-    } catch (err: any) {
-      console.error("Error en login:", err);
-      setError(err.response?.data?.error || err.message || "Error al iniciar sesión");
-    } finally {
-      setLoading(false);
+  const navigate = useNavigate(); // 👈 Hook para redirigir
+const handleLogin = async () => {
+  try {
+    setLoading(true);
+    setError("");
+
+    // login directo en Supabase
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      return;
     }
-  };
+
+    console.log("Login exitoso:", data);
+
+    // (opcional) guarda token de supabase si quieres pasar a tu API Django
+    localStorage.setItem("sb-access-token", data.session?.access_token || "");
+
+    navigate("/dashboard");
+  } catch (err: any) {
+    console.error("Error en login:", err);
+    setError(err.message || "Error al iniciar sesión");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-black via-gray-900 to-blue-950 p-4">
