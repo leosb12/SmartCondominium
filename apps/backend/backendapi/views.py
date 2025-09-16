@@ -5,13 +5,62 @@ import json
 import re
 import time
 from core.supabase_client import supabase, supabase_admin  # anon + service role
+from rest_framework import viewsets, permissions
+from .models import TipoMulta, Multa, Propiedad, CargoMulta
+from .serializers import (
+    TipoMultaSerializer,
+    MultaSerializer,
+    PropiedadSerializer,
+    CargoMultaSerializer,
+)
+
+class TipoMultaViewSet(viewsets.ModelViewSet):
+    """
+    /api/tipo-multa/  [GET, POST]
+    /api/tipo-multa/{id}/  [GET, PUT, PATCH, DELETE]
+    """
+    queryset = TipoMulta.objects.all().order_by("nombre")
+    serializer_class = TipoMultaSerializer
+    permission_classes = [permissions.AllowAny]  # cambia a IsAuthenticated si usas JWT
+
+class PropiedadViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    /api/propiedades/  [GET]
+    /api/propiedades/{id}/  [GET]
+    """
+    queryset = Propiedad.objects.all().order_by("id")
+    serializer_class = PropiedadSerializer
+    permission_classes = [permissions.AllowAny]
+
+class MultaViewSet(viewsets.ModelViewSet):
+    """
+    /api/multas/  [GET, POST]
+    /api/multas/{id}/  [GET, PUT, PATCH, DELETE]
+    - Soporta crear con propiedad_id y tipo_multa_id.
+    - Devuelve propiedad y tipo_multa anidados en lecturas.
+    """
+    queryset = (
+        Multa.objects.select_related("propiedad", "tipo_multa")
+        .all()
+        .order_by("-id")
+    )
+    serializer_class = MultaSerializer
+    permission_classes = [permissions.AllowAny]
+
+class CargoMultaViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    /api/cargo-multa/  [GET]
+    /api/cargo-multa/{pk}/  [GET]  (si defines PK compuesto, usa lookup_field custom)
+    """
+    queryset = CargoMulta.objects.all()
+    serializer_class = CargoMultaSerializer
+    permission_classes = [permissions.AllowAny]
 
 def ok(data, code=200):
     return JsonResponse(data, status=code, safe=False)
 
 def bad(msg, code=400):
     return JsonResponse({"success": False, "error": msg}, status=code)
-
 @csrf_exempt
 def login(request):
     if request.method != "POST":
@@ -24,20 +73,39 @@ def login(request):
         if not email or not password:
             return bad("Email y contraseña son obligatorios", 400)
 
-        # Autenticación con Supabase (anon)
-        res = supabase.auth.sign_in_with_password({"email": email, "password": password})
-        if not res or not res.session:
+        # Intento de login en Supabase
+        res = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password,
+        })
+
+        # Manejo explícito de error
+        if hasattr(res, "error") and res.error:
+            return bad(f"Error en Supabase: {res.error.message}", 401)
+
+        # Manejo si no hay sesión
+        session = getattr(res, "session", None)
+        if not session:
             return bad("Credenciales inválidas", 401)
 
-        session = res.session
-        return ok({
+        user = getattr(session, "user", None)
+        if not user:
+            return bad("No se pudo obtener usuario de la sesión", 401)
+
+        return JsonResponse({
             "success": True,
-            "user": session.user.email,
-            "access_token": session.access_token,
-            "refresh_token": session.refresh_token,
-        })
+            "user": {
+                "id": getattr(user, "id", None),
+                "email": getattr(user, "email", None),
+            },
+            "access_token": getattr(session, "access_token", None),
+            "refresh_token": getattr(session, "refresh_token", None),
+        }, status=200)
+
     except Exception as e:
-        return bad(str(e), 500)
+        import traceback
+        traceback.print_exc()  # imprime el error en consola
+        return bad(f"Excepción en login: {str(e)}", 500)
 
 
 @csrf_exempt
@@ -130,7 +198,7 @@ def forgot_password(request):
         if not re.match(email_regex, email):
             return bad("Formato de email inválido", 400)
 
-        redirect_url = "http://localhost:5173/reset-password"  # cámbialo en prod
+        redirect_url = "https://smart-condominium-web.vercel.app/reset-password"
         supabase.auth.reset_password_for_email(email, {"redirect_to": redirect_url})
 
         return ok({
@@ -177,3 +245,46 @@ def reset_password(request):
         return ok({"success": True, "message": "Contraseña actualizada exitosamente"})
     except Exception as e:
         return bad(str(e), 500)
+
+
+@csrf_exempt
+def me(request):
+    if request.method != "GET":
+        return bad("Método no permitido", 405)
+
+    # Tomar el Bearer token del header
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return bad("Falta token (Authorization: Bearer <token>)", 401)
+
+    access_token = auth.split(" ", 1)[1].strip()
+    try:
+        # Validar token y obtener usuario desde Supabase
+        res = supabase.auth.get_user(access_token)
+        u = getattr(res, "user", None)
+        if not u:
+            return bad("Token inválido o expirado", 401)
+
+        # Intentar completar nombre desde tabla profiles (service role)
+        full_name = ""
+        try:
+            sel = supabase_admin.table("profiles") \
+                .select("first_name,last_name") \
+                .eq("id", u.id).single().execute()
+            if sel.data:
+                fn = (sel.data.get("first_name") or "").strip()
+                ln = (sel.data.get("last_name") or "").strip()
+                full_name = f"{fn} {ln}".strip()
+        except Exception:
+            pass
+
+        if not full_name:
+            md = getattr(u, "user_metadata", {}) or {}
+            full_name = md.get("full_name") or md.get("name") or ""
+
+        return ok({
+            "email": getattr(u, "email", ""),
+            "full_name": full_name or getattr(u, "email", ""),
+        })
+    except Exception as e:
+        return bad(f"Excepción en /me: {str(e)}", 500)
