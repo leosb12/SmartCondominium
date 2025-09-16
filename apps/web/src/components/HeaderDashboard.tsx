@@ -1,13 +1,22 @@
+// src/components/HeaderDashboard.tsx
 import React from "react";
 import { Menu, Bell, Settings } from "lucide-react";
 
-interface HeaderDashboardProps {
+export interface HeaderDashboardProps {
   onOpenSidebar: () => void;
+  title?: string;
+  subtitle?: string;
+  icon?: React.ReactNode;
 }
 
-const HeaderDashboard: React.FC<HeaderDashboardProps> = ({ onOpenSidebar }) => {
+const HeaderDashboard: React.FC<HeaderDashboardProps> = ({
+  onOpenSidebar,
+  title = "Panel de Administración",
+  subtitle = "Herramientas para gestionar residentes, finanzas, seguridad y operaciones",
+  icon,
+}) => {
   return (
-    <header className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700/50 p-4">
+    <header className="bg-slate-900/50 backdrop-blur-sm border-b border-slate-700/50 p-4 sticky top-0 z-30">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Botón menú mobile */}
@@ -18,14 +27,17 @@ const HeaderDashboard: React.FC<HeaderDashboardProps> = ({ onOpenSidebar }) => {
             <Menu size={24} />
           </button>
 
-          {/* Título */}
-          <div>
-            <h1 className="text-2xl font-bold text-white">
-              Panel de Administración
-            </h1>
-            <p className="text-slate-400">
-              Herramientas para gestionar residentes, finanzas, seguridad y operaciones
-            </p>
+          {/* Título dinámico */}
+          <div className="flex items-center gap-3">
+            {icon && (
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600/20 ring-1 ring-inset ring-blue-500/30">
+                {icon}
+              </span>
+            )}
+            <div>
+              <h1 className="text-2xl font-bold text-white">{title}</h1>
+              <p className="text-slate-400">{subtitle}</p>
+            </div>
           </div>
         </div>
 

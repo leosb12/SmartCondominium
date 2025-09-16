@@ -1,18 +1,18 @@
-// src/components/MenuDashboard.tsx
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Home, Users, Building, DollarSign, Wrench,
   BarChart3, Shield, X, LogOut
 } from "lucide-react";
+import { api } from "../services/api";
 
 export type UserProfile = { email: string; full_name: string };
 
 export interface MenuDashboardProps {
   isOpen: boolean;
   onClose: () => void;
-  user: UserProfile | null;
-  onLogout: () => Promise<void>;
+  user: UserProfile | null; // opcional: si no se pasa, se carga del endpoint
+  onLogout?: () => Promise<void>; // opcional, pero implementamos fallback aquí
 }
 
 const baseItem =
@@ -23,7 +23,51 @@ const activeItem =
 const MenuDashboard: React.FC<MenuDashboardProps> = ({
   isOpen, onClose, user, onLogout,
 }) => {
-  const initial = (user?.full_name || user?.email || "U").trim().charAt(0).toUpperCase();
+  const navigate = useNavigate();
+  const [localUser, setLocalUser] = useState<UserProfile | null>(null);
+  const [loadingUser, setLoadingUser] = useState(false);
+
+  // cargar perfil si no viene como prop
+  useEffect(() => {
+    if (user) return;
+    const token = localStorage.getItem("access_token");
+    if (!token) return;
+
+    setLoadingUser(true);
+    api
+      .get("/me/", { headers: { Authorization: `Bearer ${token}` } })
+      .then((res) => {
+        setLocalUser({
+          email: res.data?.email ?? "usuario@dominio.com",
+          full_name: res.data?.full_name ?? "Usuario",
+        });
+      })
+      .catch(() => {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+        navigate("/login", { replace: true });
+      })
+      .finally(() => setLoadingUser(false));
+  }, [user, navigate]);
+
+  const displayUser = user ?? localUser;
+  const initial = (displayUser?.full_name || displayUser?.email || "U")
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+
+  // ✅ logout que siempre funciona
+  const handleLogout = async () => {
+    try {
+      if (onLogout) {
+        await onLogout(); // si el padre definió uno, úsalo
+      }
+    } finally {
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      navigate("/login", { replace: true });
+    }
+  };
 
   const items = [
     { to: "/dashboard", label: "Dashboard", icon: <Home size={20} /> },
@@ -81,13 +125,17 @@ const MenuDashboard: React.FC<MenuDashboardProps> = ({
               <span className="text-sm font-semibold">{initial}</span>
             </div>
             <div>
-              <p className="text-sm font-medium text-white">{user?.full_name || "Usuario"}</p>
-              <p className="text-xs text-slate-400">{user?.email || "—"}</p>
+              <p className="text-sm font-medium text-white">
+                {loadingUser ? "Cargando..." : (displayUser?.full_name || "Usuario")}
+              </p>
+              <p className="text-xs text-slate-400">
+                {loadingUser ? "—" : (displayUser?.email || "—")}
+              </p>
             </div>
           </div>
 
           <button
-            onClick={onLogout}
+            onClick={handleLogout}
             className="flex items-center space-x-3 text-slate-300 hover:text-red-400 transition-colors"
           >
             <LogOut size={16} />

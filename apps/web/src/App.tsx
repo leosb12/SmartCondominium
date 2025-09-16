@@ -1,3 +1,4 @@
+// src/App.tsx
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -6,6 +7,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Finance from "./pages/Finance";
+import GestionarMultas from "./pages/GestionarMulta";
 
 export default function App() {
   return (
@@ -21,6 +24,8 @@ export default function App() {
         {/* Privadas */}
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/finanzas" element={<Finance />} />
+          <Route path="/finanzas/gestionar-multas" element={<GestionarMultas />} />
         </Route>
       </Routes>
     </BrowserRouter>
