@@ -46,7 +46,7 @@ class MFAService:
         
         img = qr.make_image(fill_color="black", back_color="white")
         buffer = BytesIO()
-        img.save(buffer, format='PNG')
+        img.save(buffer, 'PNG')
         
         img_str = base64.b64encode(buffer.getvalue()).decode()
         return f"data:image/png;base64,{img_str}"
