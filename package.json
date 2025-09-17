@@ -2,8 +2,7 @@
   "name": "smart-condominium",
   "private": true,
   "workspaces": [
-    "apps/backend",
-    "apps/mobile"
+    "apps/*"
   ],
   "scripts": {
     "dev": "npm run dev:web",
