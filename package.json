@@ -16,6 +16,7 @@
     "format": "turbo run format"
   },
   "devDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.50.2",
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
     "rollup": "^4.50.2",
