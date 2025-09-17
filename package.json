@@ -1,9 +1,9 @@
 {
-  "name": "si2-mono",
+  "name": "smart-condominium",
   "private": true,
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/backend",
+    "apps/mobile"
   ],
   "scripts": {
     "dev": "npm run dev:web",
@@ -11,19 +11,20 @@
     "dev:web": "npm run dev -w @si2/web",
     "dev:backend": "npm run dev -w @si2/backend",
     "dev:mobile": "npm run dev -w @si2/mobile",
-    "build": "turbo run build",
+    "build": "npm run build --workspace=@si2/web",
+    "build:force": "npm install --force && npm run build --workspace=@si2/web",
     "lint": "turbo run lint",
     "format": "turbo run format"
   },
   "devDependencies": {
     "@types/react": "^19.1.13",
     "@types/react-dom": "^19.1.9",
-    "turbo": "^2.0.0"
+    "turbo": "^1.10.0"
   },
-  "packageManager": "npm@10.9.2",
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "react-router-dom": "^7.8.2",
     "tailwindcss": "^4.1.13"
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }
