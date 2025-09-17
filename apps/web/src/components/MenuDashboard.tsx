@@ -89,18 +89,18 @@ const MenuDashboard: React.FC<MenuDashboardProps> = ({
       <aside
         className={`fixed left-0 top-0 h-full w-64 bg-slate-900/95 backdrop-blur-sm
         border-r border-slate-700/50 z-50 transform transition-transform duration-300
-        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}`}
+        ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"} flex flex-col`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
+        <div className="flex items-center justify-between p-6 border-b border-slate-700/50 flex-shrink-0">
           <h2 className="text-xl font-bold text-blue-400">Smart Condominium</h2>
           <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
             <X size={24} />
           </button>
         </div>
 
-        {/* Nav */}
-        <nav className="p-6">
+        {/* Nav - Scrollable */}
+        <nav className="flex-1 overflow-y-auto p-6">
           <ul className="space-y-2">
             {items.map((it) => (
               <li key={it.to}>
@@ -119,8 +119,8 @@ const MenuDashboard: React.FC<MenuDashboardProps> = ({
           </ul>
         </nav>
 
-        {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-slate-700/50">
+        {/* Footer - Fixed at bottom */}
+        <div className="p-6 border-t border-slate-700/50 flex-shrink-0">
           <div className="flex items-center space-x-3 text-slate-300 mb-4">
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
               <span className="text-sm font-semibold">{initial}</span>

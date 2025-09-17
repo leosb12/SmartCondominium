@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { api } from "../services/api";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { Link } from "react-router-dom";
+import { useAdminCheck } from "../hooks/useRoles";
 import {
   Shield,
   ShieldCheck,
@@ -73,6 +74,9 @@ export default function AutenticacionSeguridad() {
   const [msg, setMsg] = useState("");
   const [err, setErr] = useState("");
 
+  // Verificación de rol de administrador
+  const { isAdmin, loading: adminLoading } = useAdminCheck();
+
   // Estado MFA
   const [mfaStatus, setMfaStatus] = useState<MFAStatus | null>(null);
   const [mfaAttempts, setMfaAttempts] = useState<MFAAttempt[]>([]);
@@ -102,7 +106,6 @@ export default function AutenticacionSeguridad() {
   useEffect(() => {
     loadMFAStatus();
     loadMFAAttempts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadMFAStatus = async () => {
@@ -323,7 +326,7 @@ export default function AutenticacionSeguridad() {
 
       {/* Contenido */}
       <main className="px-6 sm:px-10 py-8 space-y-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className={`grid gap-6 ${isAdmin ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'}`}>
           {/* Card: Estado MFA */}
           <section className="rounded-2xl border border-blue-900/50 bg-slate-900/60 shadow-xl">
             <div className="p-6">
@@ -433,29 +436,31 @@ export default function AutenticacionSeguridad() {
             </div>
           </section>
 
-          {/* Card: Gestión de Roles */}
-          <section className="rounded-2xl border border-blue-900/50 bg-slate-900/60 shadow-xl">
-            <div className="p-6 flex items-center justify-center h-full min-h-[200px]">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-600/20 rounded-lg mx-auto mb-3 flex items-center justify-center">
-                  <Users size={24} className="text-blue-400" />
+          {/* Card: Gestión de Roles - Solo para administradores */}
+          {isAdmin && (
+            <section className="rounded-2xl border border-blue-900/50 bg-slate-900/60 shadow-xl">
+              <div className="p-6 flex items-center justify-center h-full min-h-[200px]">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-600/20 rounded-lg mx-auto mb-3 flex items-center justify-center">
+                    <Users size={24} className="text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-slate-200 mb-2">
+                    Gestión de Roles
+                  </h3>
+                  <p className="text-sm text-slate-400 mb-4">
+                    Administra permisos y roles de usuarios del sistema
+                  </p>
+                  <Link
+                    to="/gestionrol"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition text-sm font-medium"
+                  >
+                    <Settings size={16} />
+                    Gestionar Roles
+                  </Link>
                 </div>
-                <h3 className="text-lg font-medium text-slate-200 mb-2">
-                  Gestión de Roles
-                </h3>
-                <p className="text-sm text-slate-400 mb-4">
-                  Administra permisos y roles de usuarios del sistema
-                </p>
-                <Link
-                  to="/gestionrol"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition text-sm font-medium"
-                >
-                  <Settings size={16} />
-                  Gestionar Roles
-                </Link>
               </div>
-            </div>
-          </section>
+            </section>
+          )}
         </div>
 
         {/* Card: Actividad reciente */}
