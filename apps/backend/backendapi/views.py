@@ -19,6 +19,7 @@ from .serializers import (
     PropiedadSerializer,
     CargoMultaSerializer,
 )
+from .mfa_services import MFAService
 
 
 # -----------------------------
@@ -43,6 +44,8 @@ def login(request):
         data = json.loads(request.body)
         email = (data.get("email") or "").strip()
         password = (data.get("password") or "").strip()
+        mfa_code = (data.get("mfa_code") or "").strip()
+        mfa_method = data.get("mfa_method", "totp")
 
         if not email or not password:
             return bad("Email y contraseña son obligatorios", 400)
@@ -66,11 +69,34 @@ def login(request):
         if not user:
             return bad("No se pudo obtener usuario de la sesión", 401)
 
+        # Verificar si el usuario tiene MFA habilitado
+        mfa_enabled = MFAService.is_mfa_enabled(user.id)
+        
+        if mfa_enabled:
+            # Si tiene MFA pero no envió código
+            if not mfa_code:
+                return JsonResponse({
+                    "success": False,
+                    "mfa_required": True,
+                    "message": "Código MFA requerido",
+                    "user_id": user.id  # Para referencia en el frontend
+                }, status=200)
+            
+            # Verificar código MFA
+            mfa_success, mfa_message = MFAService.verify_mfa_code(
+                user.id, user.email, mfa_code, mfa_method
+            )
+            
+            if not mfa_success:
+                return bad(f"MFA: {mfa_message}", 401)
+
+        # Login exitoso (con o sin MFA)
         return JsonResponse({
             "success": True,
             "user": {
                 "id": getattr(user, "id", None),
                 "email": getattr(user, "email", None),
+                "mfa_enabled": mfa_enabled
             },
             "access_token": getattr(session, "access_token", None),
             "refresh_token": getattr(session, "refresh_token", None),

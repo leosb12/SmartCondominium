@@ -17,4 +17,10 @@ urlpatterns = [
 
     # Endpoints REST
     path("", include(router.urls)),
+
+    # URLs MFA
+    path("mfa/", include("backendapi.mfa_urls")),
+    
+    # URLs Gestión de Roles
+    path("roles/", include("backendapi.roles.urls")),
 ]
