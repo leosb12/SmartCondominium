@@ -37,9 +37,9 @@ const Finance: React.FC = () => {
       <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
         <Card
           icon={<ShieldAlert className="h-7 w-7 text-blue-400" />}
-          title="Gestionar multas"
-          desc="Crea, administra y asigna multas a propiedades."
-          onClick={() => navigate("/finanzas/gestionar-multas")}
+          title="Gestionar multas y expensas"
+          desc="Crea, administra y asigna multas a propiedades o controla las expensas."
+          onClick={() => navigate("/finanzas/gestionar-multas-expensas")}
         />
         <Card
           icon={<BarChart3 className="h-7 w-7 text-blue-400" />}
