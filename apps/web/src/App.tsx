@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Finance from "./pages/Finance";
 import GestionarMultas from "./pages/GestionarMulta";
+import AutenticacionSeguridad from "./pages/AutenticacionSeguridad";
+import GestionRoles from "./pages/GestionRoles";
 
 export default function App() {
   return (
@@ -26,6 +28,8 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/finanzas" element={<Finance />} />
           <Route path="/finanzas/gestionar-multas" element={<GestionarMultas />} />
+          <Route path="/autenticacion-seguridad" element={<AutenticacionSeguridad />} />
+          <Route path="/gestionrol" element={<GestionRoles />} />
         </Route>
       </Routes>
     </BrowserRouter>
