@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class TipoMulta(models.Model):
     id = models.BigAutoField(primary_key=True)
     nombre = models.TextField()
@@ -35,6 +36,7 @@ class Multa(models.Model):
     )
     fecha = models.DateField()
     total = models.DecimalField(max_digits=14, decimal_places=2)
+    observacion = models.TextField(null=True, blank=True)  # <- ya soporta el campo extra
 
     class Meta:
         db_table = "multas"
@@ -48,10 +50,12 @@ class CargoMulta(models.Model):
         db_column="multa_id",
         on_delete=models.DO_NOTHING,
         related_name="cargos",
-        primary_key=True,  # para que Django tenga una PK, aunque en DB sea compuesta
     )
 
     class Meta:
         db_table = "cargo_multa"
         managed = False
         unique_together = (("cargo_id", "multa"),)
+        # Django exige una PK, si en tu BD es compuesta (cargo_id + multa_id),
+        # esta configuración con unique_together replica esa restricción.
+        # Si tienes ya una PK real en la tabla, elimina unique_together
