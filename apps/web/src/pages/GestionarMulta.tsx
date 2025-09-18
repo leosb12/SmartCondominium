@@ -2,9 +2,10 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../services/api";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import { useAdminCheck } from "../hooks/useRoles";
 
 /**
- * Página: Gestionar Multa (vía endpoints Django)
+ * Página: Gestionar Multa (vía endpoints Django) — SOLO ADMIN
  * - Crear Tipo de Multa
  * - Generar Multa
  * - Listado con "Ver detalles" (observación, estado pagada/impaga, editar/eliminar)
@@ -35,6 +36,9 @@ type Multa = {
 };
 
 export default function GestionarMulta() {
+  // 🔐 Solo admins
+  const { isAdmin, loading: adminLoading } = useAdminCheck();
+
   // UI state
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string>("");
@@ -108,8 +112,10 @@ export default function GestionarMulta() {
       </span>
     );
 
-  // Carga inicial
+  // Carga inicial — solo si es admin
   useEffect(() => {
+    if (!isAdmin) return;
+
     const bootstrap = async () => {
       setLoading(true);
       setErr("");
@@ -147,7 +153,7 @@ export default function GestionarMulta() {
 
     bootstrap();
     cargarMultasYEstados();
-  }, []);
+  }, [isAdmin]);
 
   // Acciones: crear tipo
   const handleCreateTipo = async (ev: React.FormEvent) => {
@@ -307,6 +313,24 @@ export default function GestionarMulta() {
     return t ? t.nombre : `Tipo #${m.tipo_multa_id}`;
   };
 
+  // 🔒 Gate de acceso en UI
+  if (adminLoading) {
+    return (
+      <DashboardLayout title="Gestionar multas">
+        <div className="p-6 text-slate-400">Verificando rol de administrador…</div>
+      </DashboardLayout>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <DashboardLayout title="Acceso denegado">
+        <div className="p-6 text-red-400">Esta sección es solo para administradores.</div>
+      </DashboardLayout>
+    );
+  }
+
+  // ✅ Render solo para admins
   return (
     <DashboardLayout title="Gestionar multas" subtitle="Crea tipos de multa, genera nuevas multas y revisa el historial.">
       {/* Feedback global */}
@@ -458,7 +482,6 @@ export default function GestionarMulta() {
                     onChange={(e) => setForm((f) => ({ ...f, observacion: e.target.value }))}
                     className="w-full rounded-xl bg-slate-950/70 border border-blue-900/60 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
                   />
-
                 </div>
 
                 <div className="sm:col-span-2 flex items-center gap-3 pt-2">
@@ -615,7 +638,6 @@ export default function GestionarMulta() {
                                       Cancelar
                                     </button>
                                   </div>
-
                                 </div>
                               )}
                             </td>
@@ -627,8 +649,6 @@ export default function GestionarMulta() {
                 </tbody>
               </table>
             </div>
-
-
           </div>
         </section>
       </main>

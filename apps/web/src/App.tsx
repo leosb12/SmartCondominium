@@ -11,6 +11,7 @@ import Finance from "./pages/Finance";
 import GestionarMultas from "./pages/GestionarMulta";
 import AutenticacionSeguridad from "./pages/AutenticacionSeguridad";
 import GestionRoles from "./pages/GestionRoles";
+import GestionarMultasExpensas from  "./pages/GestionarMultasExpensas"
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/finanzas/gestionar-multas" element={<GestionarMultas />} />
           <Route path="/autenticacion-seguridad" element={<AutenticacionSeguridad />} />
           <Route path="/gestionrol" element={<GestionRoles />} />
+          <Route path="/finanzas/gestionar-multas-expensas" element={<GestionarMultasExpensas />} />
         </Route>
       </Routes>
     </BrowserRouter>
