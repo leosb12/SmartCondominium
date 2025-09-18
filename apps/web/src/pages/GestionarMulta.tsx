@@ -5,11 +5,9 @@ import DashboardLayout from "../Layouts/DashboardLayout";
 
 /**
  * Página: Gestionar Multa (vía endpoints Django)
- * - Sección A: Crear nuevo "Tipo de multa"
- * - Sección B: Generar multa (Propiedad + Tipo + fecha + monto)
- * - Sección C: Listado "Todas las multas"
- *
- * Paleta: tonos azul oscuro sobre fondo oscuro (Tailwind)
+ * - Crear Tipo de Multa
+ * - Generar Multa
+ * - Listado con "Ver detalles" (observación, estado pagada/impaga, editar/eliminar)
  */
 
 type TipoMulta = { id: number; nombre: string };
@@ -30,6 +28,7 @@ type Multa = {
   tipo_multa_id: number;
   fecha: string; // "YYYY-MM-DD"
   total: number;
+  observacion?: string | null;
   propiedad?: Propiedad | null;
   tipo_multa?: TipoMulta | null;
   [k: string]: any;
@@ -48,6 +47,18 @@ export default function GestionarMulta() {
   // Listado de multas
   const [multas, setMultas] = useState<Multa[]>([]);
   const [loadingMultas, setLoadingMultas] = useState(false);
+
+  // Estado de pago: Set de IDs pagadas
+  const [pagadasIds, setPagadasIds] = useState<Set<number>>(new Set());
+
+  // Filas expandidas y edición
+  const [expanded, setExpanded] = useState<Set<number>>(new Set());
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editForm, setEditForm] = useState<{ fecha: string; total: string; observacion: string }>({
+    fecha: "",
+    total: "",
+    observacion: "",
+  });
 
   // Crear Tipo de Multa
   const [nuevoTipo, setNuevoTipo] = useState<string>("");
@@ -85,6 +96,18 @@ export default function GestionarMulta() {
     );
   }, [form]);
 
+  const isPagada = (m: Multa) => pagadasIds.has(m.id);
+  const estadoChip = (m: Multa) =>
+    isPagada(m) ? (
+      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-700/60 bg-emerald-900/30 px-2 py-0.5 text-xs">
+        <span className="size-2 rounded-full bg-emerald-500" /> Pagada
+      </span>
+    ) : (
+      <span className="inline-flex items-center gap-1 rounded-full border border-amber-700/60 bg-amber-900/30 px-2 py-0.5 text-xs">
+        <span className="size-2 rounded-full bg-amber-400" /> Impaga
+      </span>
+    );
+
   // Carga inicial
   useEffect(() => {
     const bootstrap = async () => {
@@ -105,11 +128,16 @@ export default function GestionarMulta() {
       }
     };
 
-    const cargarMultas = async () => {
+    const cargarMultasYEstados = async () => {
       setLoadingMultas(true);
       try {
-        const multasRes = await api.get<Multa[]>("/multas/");
+        const [multasRes, pagadasRes] = await Promise.all([
+          api.get<Multa[]>("/multas/"),
+          api.get<Multa[]>("/multas/pagadas/"),
+        ]);
         setMultas(multasRes.data || []);
+        const setIds = new Set<number>((pagadasRes.data || []).map((x: Multa) => x.id));
+        setPagadasIds(setIds);
       } catch (e) {
         console.error(e);
       } finally {
@@ -118,10 +146,10 @@ export default function GestionarMulta() {
     };
 
     bootstrap();
-    cargarMultas();
+    cargarMultasYEstados();
   }, []);
 
-  // Acciones
+  // Acciones: crear tipo
   const handleCreateTipo = async (ev: React.FormEvent) => {
     ev.preventDefault();
     setMsg("");
@@ -147,6 +175,7 @@ export default function GestionarMulta() {
     }
   };
 
+  // Acciones: crear multa
   const handleCreateMulta = async (ev: React.FormEvent) => {
     ev.preventDefault();
     setMsg("");
@@ -162,6 +191,8 @@ export default function GestionarMulta() {
         tipo_multa_id: Number(form.tipo_multa_id),
         fecha: form.fecha,
         total: Number(form.total),
+        // observacion es opcional; si tu backend aún no lo soporta, lo ignorará
+        ...(form.observacion?.trim() ? { observacion: form.observacion.trim() } : {}),
       };
       const res = await api.post<Multa | Multa[]>("/multas/", payload);
 
@@ -171,6 +202,12 @@ export default function GestionarMulta() {
 
       if (nueva) {
         setMultas((prev) => [nueva!, ...prev]);
+        // al crear no hay pago → marcar como impaga
+        setPagadasIds((old) => {
+          const copy = new Set(old);
+          copy.delete(nueva!.id);
+          return copy;
+        });
       } else {
         const rec = await api.get<Multa[]>("/multas/");
         setMultas(rec.data || []);
@@ -183,6 +220,78 @@ export default function GestionarMulta() {
       setErr(e?.response?.data?.detail || e?.message || "No se pudo generar la multa.");
     } finally {
       setCreatingMulta(false);
+    }
+  };
+
+  // Acciones: expandir/colapsar
+  const toggleExpand = (id: number) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  // Acciones: eliminar
+  const handleDelete = async (m: Multa) => {
+    const seguro = confirm(`¿Eliminar la multa #${m.id}?`);
+    if (!seguro) return;
+    setErr("");
+    setMsg("");
+    try {
+      await api.delete(`/multas/${m.id}/`);
+      setMultas((prev) => prev.filter((x) => x.id !== m.id));
+      setPagadasIds((old) => {
+        const copy = new Set(old);
+        copy.delete(m.id);
+        return copy;
+      });
+      setMsg(`Multa #${m.id} eliminada.`);
+    } catch (e: any) {
+      console.error(e);
+      setErr(e?.response?.data?.detail || e?.message || "No se pudo eliminar la multa.");
+    }
+  };
+
+  // Acciones: iniciar edición
+  const startEdit = (m: Multa) => {
+    setEditingId(m.id);
+    setEditForm({
+      fecha: m.fecha ?? "",
+      total: String(m.total ?? ""),
+      observacion: (m.observacion ?? "") as string,
+    });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+  };
+
+  // Acciones: guardar edición
+  const saveEdit = async (m: Multa) => {
+    setErr("");
+    setMsg("");
+    try {
+      const patch: any = {};
+      if (editForm.fecha && editForm.fecha !== m.fecha) patch.fecha = editForm.fecha;
+      if (editForm.total !== "" && Number(editForm.total) !== Number(m.total))
+        patch.total = Number(editForm.total);
+      if ((editForm.observacion || "") !== (m.observacion || "")) patch.observacion = editForm.observacion || null;
+
+      if (Object.keys(patch).length === 0) {
+        setEditingId(null);
+        return;
+      }
+
+      const res = await api.patch<Multa>(`/multas/${m.id}/`, patch);
+      const actualizado = res.data;
+
+      setMultas((prev) => prev.map((x) => (x.id === m.id ? { ...x, ...actualizado } : x)));
+      setEditingId(null);
+      setMsg(`Multa #${m.id} actualizada.`);
+    } catch (e: any) {
+      console.error(e);
+      setErr(e?.response?.data?.detail || e?.message || "No se pudo actualizar la multa.");
     }
   };
 
@@ -339,19 +448,17 @@ export default function GestionarMulta() {
                   />
                 </div>
 
-                {/* Observación (solo UI) */}
+                {/* Observación (opcional) */}
                 <div className="sm:col-span-2">
                   <label className="block text-sm text-slate-300 mb-1">Observación (opcional)</label>
                   <textarea
                     rows={3}
-                    placeholder="Ej. reincidencia, evidencia, etc. (no se guarda aún en BD)"
+                    placeholder="Ej. reincidencia, evidencia, etc."
                     value={form.observacion}
                     onChange={(e) => setForm((f) => ({ ...f, observacion: e.target.value }))}
                     className="w-full rounded-xl bg-slate-950/70 border border-blue-900/60 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
                   />
-                  <p className="text-xs text-slate-500 mt-1">
-                    Si deseas persistir este campo, añadimos <code>observacion</code> en <code>multas</code>.
-                  </p>
+
                 </div>
 
                 <div className="sm:col-span-2 flex items-center gap-3 pt-2">
@@ -362,9 +469,6 @@ export default function GestionarMulta() {
                   >
                     {creatingMulta ? "Generando…" : "Generar multa"}
                   </button>
-                  {!canCreateMulta && (
-                    <span className="text-xs text-slate-400">Completa los campos requeridos.</span>
-                  )}
                 </div>
               </form>
             </div>
@@ -388,37 +492,143 @@ export default function GestionarMulta() {
                     <th className="text-left px-4 py-3 border-b border-slate-800/60">Tipo</th>
                     <th className="text-left px-4 py-3 border-b border-slate-800/60">Fecha</th>
                     <th className="text-right px-4 py-3 border-b border-slate-800/60">Total</th>
+                    <th className="text-center px-4 py-3 border-b border-slate-800/60 w-40">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
                   {multas.length === 0 && !loadingMultas && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-6 text-center text-slate-500">
+                      <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
                         No hay multas registradas.
                       </td>
                     </tr>
                   )}
-                  {multas.map((m) => (
-                    <tr key={m.id} className="even:bg-slate-950/30 hover:bg-slate-800/30 transition">
-                      <td className="px-4 py-3">{m.id}</td>
-                      <td className="px-4 py-3">{renderPropiedad(m)}</td>
-                      <td className="px-4 py-3">{renderTipo(m)}</td>
-                      <td className="px-4 py-3">{m.fecha}</td>
-                      <td className="px-4 py-3 text-right">
-                        {Number(m.total).toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                    </tr>
-                  ))}
+
+                  {multas.map((m) => {
+                    const isOpen = expanded.has(m.id);
+                    const isEditing = editingId === m.id;
+                    return (
+                      <React.Fragment key={m.id}>
+                        <tr className="even:bg-slate-950/30 hover:bg-slate-800/30 transition">
+                          <td className="px-4 py-3">{m.id}</td>
+                          <td className="px-4 py-3">{renderPropiedad(m)}</td>
+                          <td className="px-4 py-3">{renderTipo(m)}</td>
+                          <td className="px-4 py-3">{m.fecha}</td>
+                          <td className="px-4 py-3 text-right">
+                            {Number(m.total).toLocaleString(undefined, {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => toggleExpand(m.id)}
+                              className="rounded-lg border border-blue-800/60 bg-blue-900/30 hover:bg-blue-900/50 px-3 py-1 text-xs"
+                            >
+                              {isOpen ? "Ocultar detalles" : "Ver detalles de multa"}
+                            </button>
+                          </td>
+                        </tr>
+
+                        {/* Fila de detalles expandibles */}
+                        {isOpen && (
+                          <tr className="bg-slate-950/40">
+                            <td colSpan={6} className="px-6 py-4">
+                              {!isEditing ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <div className="text-sm">
+                                      <span className="text-slate-400">Estado: </span>
+                                      {estadoChip(m)}
+                                    </div>
+                                    <div className="text-sm">
+                                      <span className="text-slate-400">Observación: </span>
+                                      <span className="text-slate-200">
+                                        {m.observacion?.trim() ? m.observacion : "–"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-2 md:justify-end">
+                                    <button
+                                      onClick={() => startEdit(m)}
+                                      className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-medium"
+                                    >
+                                      Editar
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(m)}
+                                      className="rounded-lg bg-rose-600 hover:bg-rose-500 px-3 py-1.5 text-xs font-medium"
+                                    >
+                                      Eliminar
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                // Formulario de edición inline
+                                <div className="rounded-xl border border-slate-800/60 p-4">
+                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <div>
+                                      <label className="block text-xs text-slate-400 mb-1">Fecha</label>
+                                      <input
+                                        type="date"
+                                        value={editForm.fecha}
+                                        onChange={(e) => setEditForm((f) => ({ ...f, fecha: e.target.value }))}
+                                        className="w-full rounded-lg bg-slate-950/70 border border-blue-900/60 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="block text-xs text-slate-400 mb-1">Total</label>
+                                      <input
+                                        type="number"
+                                        step="0.01"
+                                        value={editForm.total}
+                                        onChange={(e) => setEditForm((f) => ({ ...f, total: e.target.value }))}
+                                        className="w-full rounded-lg bg-slate-950/70 border border-blue-900/60 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                                      />
+                                    </div>
+                                    <div className="sm:col-span-3">
+                                      <label className="block text-xs text-slate-400 mb-1">Observación</label>
+                                      <textarea
+                                        rows={3}
+                                        value={editForm.observacion}
+                                        onChange={(e) =>
+                                          setEditForm((f) => ({ ...f, observacion: e.target.value }))
+                                        }
+                                        placeholder="Añade observaciones…"
+                                        className="w-full rounded-lg bg-slate-950/70 border border-blue-900/60 px-3 py-2 outline-none focus:ring-2 focus:ring-blue-600"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  <div className="mt-4 flex items-center gap-2">
+                                    <button
+                                      onClick={() => saveEdit(m)}
+                                      className="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-medium"
+                                    >
+                                      Guardar
+                                    </button>
+                                    <button
+                                      onClick={cancelEdit}
+                                      className="rounded-lg bg-slate-700 hover:bg-slate-600 px-3 py-1.5 text-xs font-medium"
+                                    >
+                                      Cancelar
+                                    </button>
+                                  </div>
+
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
 
-            <p className="text-xs text-slate-500 mt-3">
-              Si tu endpoint de <code>/multas/</code> usa paginación (DRF), podemos añadir controles con <code>?page=</code>.
-            </p>
+
           </div>
         </section>
       </main>
