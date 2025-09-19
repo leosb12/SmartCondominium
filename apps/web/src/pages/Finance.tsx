@@ -1,8 +1,9 @@
 // src/pages/Finance.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { DollarSign, ShieldAlert, BarChart3, FileText } from "lucide-react";
+import { DollarSign, ShieldAlert, BarChart3, FileText, Settings } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import { useRoles } from "../hooks/useRoles";
 
 const Card: React.FC<{icon: React.ReactNode; title: string; desc: string; onClick: () => void;}> = ({ icon, title, desc, onClick }) => (
   <button
@@ -21,6 +22,7 @@ const Card: React.FC<{icon: React.ReactNode; title: string; desc: string; onClic
 
 const Finance: React.FC = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useRoles();
 
   return (
     <DashboardLayout
@@ -41,6 +43,17 @@ const Finance: React.FC = () => {
           desc="Crea, administra y asigna multas a propiedades o controla las expensas."
           onClick={() => navigate("/finanzas/gestionar-multas-expensas")}
         />
+        
+        {/* Card solo para administradores */}
+        {isAdmin && (
+          <Card
+            icon={<Settings className="h-7 w-7 text-blue-400" />}
+            title="Cuotas ordinarias y extraordinarias"
+            desc="Administra tarifas por m², extraordinarias y generación de expensas."
+            onClick={() => navigate("/finanzas/administrar-cuotas")}
+          />
+        )}
+        
         <Card
           icon={<BarChart3 className="h-7 w-7 text-blue-400" />}
           title="Reportes financieros"
