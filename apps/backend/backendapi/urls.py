@@ -23,4 +23,7 @@ urlpatterns = [
     
     # URLs Gestión de Roles
     path("roles/", include("backendapi.roles.urls")),
+    
+    # URLs Administración de Finanzas
+    path("admin/finanzas/", include("backendapi.finance_admin.urls")),
 ]
