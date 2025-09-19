@@ -1,4 +1,3 @@
-// src/pages/ReporteFinanza.tsx
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -110,45 +109,66 @@ const Table: React.FC<{
   cols: string[];
   rows: React.ReactNode[][];
   emptyMsg?: string;
-}> = ({ cols, rows, emptyMsg = "Sin datos" }) => (
-  <div className="overflow-x-auto rounded-2xl border border-slate-800/60">
-    <table className="min-w-full text-sm">
-      <thead className="bg-slate-900/60 text-slate-300">
-        <tr>
-          {cols.map((c, i) => (
-            <th key={i} className="px-4 py-3 text-left font-medium">
-              {c}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-slate-800/70">
-        {rows.length === 0 ? (
-          <tr>
-            <td className="px-4 py-6 text-slate-500" colSpan={cols.length}>
-              {emptyMsg}
-            </td>
-          </tr>
-        ) : (
-          rows.map((r, i) => (
-            <tr key={i} className="hover:bg-slate-900/40">
-              {r.map((cell, j) => (
-                <td key={j} className="px-4 py-3 text-slate-200">
-                  {cell}
-                </td>
+}> = ({ cols, rows, emptyMsg = "Sin datos" }) => {
+  if (rows.length === 0) {
+    return (
+      <div className="rounded-2xl border border-slate-800/60 p-6 text-center text-slate-500">
+        {emptyMsg}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Mobile: tarjetas apiladas */}
+      <div className="grid gap-3 sm:hidden">
+        {rows.map((cells, i) => (
+          <div key={i} className="rounded-2xl border border-slate-800/60 bg-slate-950/40 p-4">
+            <dl className="grid grid-cols-1 gap-2">
+              {cells.map((cell, j) => (
+                <div key={j} className="flex items-start justify-between gap-3">
+                  <dt className="text-slate-400 text-xs">{cols[j]}</dt>
+                  <dd className="text-slate-100 text-sm text-right">{cell}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+
+      {/* Desktop/Tablet: tabla tradicional */}
+      <div className="hidden sm:block overflow-x-auto rounded-2xl border border-slate-800/60">
+        <table className="min-w-full text-sm">
+          <thead className="bg-slate-900/60 text-slate-300">
+            <tr>
+              {cols.map((c, i) => (
+                <th key={i} className="px-4 py-3 text-left font-medium">
+                  {c}
+                </th>
               ))}
             </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-);
+          </thead>
+          <tbody className="divide-y divide-slate-800/70">
+            {rows.map((r, i) => (
+              <tr key={i} className="hover:bg-slate-900/40">
+                {r.map((cell, j) => (
+                  <td key={j} className="px-4 py-3 text-slate-200">
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+};
 
 const ReporteFinanza: React.FC = () => {
   const navigate = useNavigate();
 
-  // ✅ Verificación de admin como en tu ejemplo
+  // ✅ Verificación de admin
   const { isAdmin, loading: adminLoading } = useAdminCheck();
 
   const [desde, setDesde] = useState<string>("");
@@ -175,14 +195,13 @@ const ReporteFinanza: React.FC = () => {
       if (hasta) body.hasta = new Date(hasta).toISOString();
       if (propiedadId) body.propiedad_id = Number(propiedadId);
 
-      // ejemplo dentro de onSubmit (ya tenés import { api } from "../services/api")
-const token = localStorage.getItem("access_token") || "";
-const res = await api.post<ReporteFinanciero>(
-  "/reportesfinanza/financieros/generar",
-  body,
-  { headers: { Authorization: `Bearer ${token}` } }
-);
-
+      // Llamada al endpoint con token de acceso
+      const token = localStorage.getItem("access_token") || "";
+      const res = await api.post<ReporteFinanciero>(
+        "/reportesfinanza/financieros/generar",
+        body,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
 
       setData(res.data);
     } catch (err) {
@@ -225,7 +244,7 @@ const res = await api.post<ReporteFinanciero>(
       {/* Filtros */}
       <form
         onSubmit={onSubmit}
-        className="mb-8 rounded-2xl border border-slate-800/60 bg-gradient-to-r from-blue-950/60 via-slate-900 to-slate-950 p-6"
+        className="mb-8 rounded-2xl border border-slate-800/60 bg-gradient-to-r from-blue-950/60 via-slate-900 to-slate-950 p-4 sm:p-6"
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <label className="flex flex-col gap-1">
@@ -269,14 +288,15 @@ const res = await api.post<ReporteFinanciero>(
             />
           </label>
 
-          <div className="flex items-end gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-3">
             <button
               type="submit"
               disabled={!canSubmit}
               className={cls(
-                "inline-flex items-center gap-2 rounded-xl px-4 py-2 font-medium transition",
+                "inline-flex justify-center items-center gap-2 rounded-xl px-4 py-2 font-medium transition",
                 "bg-blue-600/90 text-white ring-1 ring-inset ring-blue-500/40 hover:brightness-110",
-                (!isAdmin || loading) && "opacity-60 cursor-not-allowed"
+                (!isAdmin || loading) && "opacity-60 cursor-not-allowed",
+                "w-full sm:w-auto"
               )}
             >
               {loading ? (
@@ -293,7 +313,7 @@ const res = await api.post<ReporteFinanciero>(
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="rounded-xl px-4 py-2 text-slate-300 border border-slate-700/60 hover:bg-slate-900/50"
+              className="rounded-xl px-4 py-2 text-slate-300 border border-slate-700/60 hover:bg-slate-900/50 w-full sm:w-auto"
             >
               Volver
             </button>
@@ -301,7 +321,7 @@ const res = await api.post<ReporteFinanciero>(
         </div>
 
         {error && (
-          <div className="mt-4 flex items-center gap-2 text-rose-400 text-sm">
+          <div className="mt-4 flex items-center gap-2 text-rose-400 text-sm" role="alert" aria-live="assertive">
             <AlertTriangle className="h-4 w-4" /> {error}
           </div>
         )}
@@ -310,7 +330,7 @@ const res = await api.post<ReporteFinanciero>(
       {/* Resultados */}
       {data && (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 mb-8">
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 mb-8">
             <MetricCard
               icon={<CircleDollarSign className="h-5 w-5 text-emerald-400" />}
               label="Total generado"
@@ -339,12 +359,20 @@ const res = await api.post<ReporteFinanciero>(
 
           <div className="mb-8">
             <h3 className="text-slate-200 font-semibold mb-3">Series mensuales</h3>
-            <Table cols={["Mes", "Generado", "Cobrado"]} rows={seriesRows} emptyMsg="No hay series para el rango seleccionado." />
+            <Table
+              cols={["Mes", "Generado", "Cobrado"]}
+              rows={seriesRows}
+              emptyMsg="No hay series para el rango seleccionado."
+            />
           </div>
 
           <div className="mb-8">
             <h3 className="text-slate-200 font-semibold mb-3">Top deudores</h3>
-            <Table cols={["Propiedad", "Deuda", "Vencido (expensas)"]} rows={deudoresRows} emptyMsg="Sin deudas en el rango seleccionado." />
+            <Table
+              cols={["Propiedad", "Deuda", "Vencido (expensas)"]}
+              rows={deudoresRows}
+              emptyMsg="Sin deudas en el rango seleccionado."
+            />
           </div>
 
           <div className="grid gap-8">
@@ -400,10 +428,10 @@ const res = await api.post<ReporteFinanciero>(
             </section>
           </div>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col sm:flex-row gap-3">
             <button
               type="button"
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2 border border-slate-700/60 text-slate-200 hover:bg-slate-900/60"
+              className="inline-flex justify-center items-center gap-2 rounded-xl px-4 py-2 border border-slate-700/60 text-slate-200 hover:bg-slate-900/60 w-full sm:w-auto"
               onClick={() => window.print()}
             >
               <Download className="h-4 w-4" /> Imprimir / Guardar PDF
