@@ -13,7 +13,7 @@ import AutenticacionSeguridad from "./pages/AutenticacionSeguridad";
 import GestionRoles from "./pages/GestionRoles";
 import GestionarMultasExpensas from  "./pages/GestionarMultasExpensas";
 import AdministrarCuotas from "./pages/AdministrarCuotas";
-
+import GestionarExpensas from "./pages/GestionarExpensa"
 export default function App() {
   return (
     <BrowserRouter>
@@ -30,6 +30,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/finanzas" element={<Finance />} />
           <Route path="/finanzas/gestionar-multas" element={<GestionarMultas />} />
+          <Route path="gestionar-expensas" element={<GestionarExpensas/>} />
           <Route path="/finanzas/administrar-cuotas" element={<AdministrarCuotas />} />
           <Route path="/autenticacion-seguridad" element={<AutenticacionSeguridad />} />
           <Route path="/gestionrol" element={<GestionRoles />} />
