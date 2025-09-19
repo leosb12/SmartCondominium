@@ -41,16 +41,27 @@ export interface ExpensasGenerationResponse extends ApiResponse<{
 }> {}
 
 class FinanceService {
+  private getAuthHeaders() {
+    const token = localStorage.getItem("access_token");
+    return {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    };
+  }
+
   /**
    * Crear nueva tarifa por m²
    */
   async createTarifa(monto: number): Promise<TarifaResponse> {
     try {
-      const response = await api.post("/admin/finanzas/tarifa", { monto });
+      const response = await api.post("/admin/finanzas/tarifa", { monto }, {
+        headers: this.getAuthHeaders(),
+      });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: string } } };
       throw new Error(
-        error.response?.data?.error || "Error al crear tarifa"
+        apiError.response?.data?.error || "Error al crear tarifa"
       );
     }
   }
@@ -60,11 +71,14 @@ class FinanceService {
    */
   async getTarifaVigente(): Promise<TarifaResponse> {
     try {
-      const response = await api.get("/admin/finanzas/tarifa/vigente");
+      const response = await api.get("/admin/finanzas/tarifa/vigente", {
+        headers: this.getAuthHeaders(),
+      });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: string } } };
       throw new Error(
-        error.response?.data?.error || "Error al obtener tarifa vigente"
+        apiError.response?.data?.error || "Error al obtener tarifa vigente"
       );
     }
   }
@@ -82,11 +96,14 @@ class FinanceService {
         periodo,
         total_monto: totalMonto,
         descripcion,
+      }, {
+        headers: this.getAuthHeaders(),
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: string } } };
       throw new Error(
-        error.response?.data?.error || "Error al crear extraordinaria"
+        apiError.response?.data?.error || "Error al crear extraordinaria"
       );
     }
   }
@@ -98,11 +115,13 @@ class FinanceService {
     try {
       const response = await api.get("/admin/finanzas/extraordinaria", {
         params: { periodo },
+        headers: this.getAuthHeaders(),
       });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: string } } };
       throw new Error(
-        error.response?.data?.error || "Error al obtener extraordinaria"
+        apiError.response?.data?.error || "Error al obtener extraordinaria"
       );
     }
   }
@@ -112,11 +131,14 @@ class FinanceService {
    */
   async generarExpensasHoy(): Promise<ExpensasGenerationResponse> {
     try {
-      const response = await api.post("/admin/finanzas/expensas/generar-hoy");
+      const response = await api.post("/admin/finanzas/expensas/generar-hoy", {}, {
+        headers: this.getAuthHeaders(),
+      });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: string } } };
       throw new Error(
-        error.response?.data?.error || "Error al generar expensas"
+        apiError.response?.data?.error || "Error al generar expensas"
       );
     }
   }
@@ -124,13 +146,16 @@ class FinanceService {
   /**
    * Test de conectividad con base de datos (debug)
    */
-  async testDatabase(): Promise<any> {
+  async testDatabase(): Promise<unknown> {
     try {
-      const response = await api.get("/admin/finanzas/debug/database-test");
+      const response = await api.get("/admin/finanzas/debug/database-test", {
+        headers: this.getAuthHeaders(),
+      });
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const apiError = error as { response?: { data?: { error?: string } } };
       throw new Error(
-        error.response?.data?.error || "Error en test de base de datos"
+        apiError.response?.data?.error || "Error en test de base de datos"
       );
     }
   }
