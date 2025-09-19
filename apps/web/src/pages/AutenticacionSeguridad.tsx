@@ -75,7 +75,7 @@ export default function AutenticacionSeguridad() {
   const [err, setErr] = useState("");
 
   // Verificación de rol de administrador
-  const { isAdmin, loading: adminLoading } = useAdminCheck();
+  const { isAdmin} = useAdminCheck();
 
   // Estado MFA
   const [mfaStatus, setMfaStatus] = useState<MFAStatus | null>(null);
