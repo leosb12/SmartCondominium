@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils.decorators import method_decorator
 
-from .permissions import admin_required
+from .permissions import require_auth, require_admin
 from .validators import (
     validate_and_normalize_periodo,
     validate_future_periodo,
@@ -40,7 +40,8 @@ from .serializers import (
 
 @csrf_exempt
 @require_http_methods(["POST"])
-@admin_required
+@require_auth 
+@require_admin
 def post_tarifa(request):
     """
     [POST] /api/admin/finanzas/tarifa
@@ -93,7 +94,8 @@ def post_tarifa(request):
 
 
 @require_http_methods(["GET"])
-@admin_required
+@require_auth
+@require_admin
 def get_tarifa_vigente_view(request):
     """
     [GET] /api/admin/finanzas/tarifa/vigente
@@ -127,7 +129,8 @@ def get_tarifa_vigente_view(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
-@admin_required
+@require_auth
+@require_admin
 def post_extraordinaria(request):
     """
     [POST] /api/admin/finanzas/extraordinaria
@@ -203,7 +206,8 @@ def post_extraordinaria(request):
 
 
 @require_http_methods(["GET"])
-@admin_required
+@require_auth
+@require_admin
 def get_extraordinaria_view(request):
     """
     [GET] /api/admin/finanzas/extraordinaria?periodo=YYYY-MM
@@ -253,7 +257,8 @@ def get_extraordinaria_view(request):
 
 @csrf_exempt
 @require_http_methods(["POST"])
-@admin_required
+@require_auth
+@require_admin
 def post_generar_expensas_hoy(request):
     """
     [POST] /api/admin/finanzas/expensas/generar-hoy
@@ -293,7 +298,8 @@ def post_generar_expensas_hoy(request):
 
 
 @require_http_methods(["GET"])
-@admin_required
+@require_auth
+@require_admin
 def debug_database_test(request):
     """
     [GET] /api/admin/finanzas/debug/database-test
