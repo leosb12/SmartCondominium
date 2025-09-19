@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  Home, Users, Building, DollarSign, Wrench,
-  BarChart3, Shield, X, LogOut, ShieldCheck
+  Home,
+  Users,
+  Building,
+  DollarSign,
+  Wrench,
+  BarChart3,
+  Shield,
+  X,
+  LogOut,
+  ShieldCheck,
+  MessageSquareText, // <- Nuevo icono para "Comunicación"
 } from "lucide-react";
 import { api } from "../services/api";
 
@@ -17,11 +26,13 @@ export interface MenuDashboardProps {
 
 const baseItem =
   "flex items-center space-x-3 p-3 rounded-lg transition-all text-slate-300 hover:text-white hover:bg-slate-800/50";
-const activeItem =
-  "text-blue-400 bg-blue-600/20 hover:bg-blue-600/20";
+const activeItem = "text-blue-400 bg-blue-600/20 hover:bg-blue-600/20";
 
 const MenuDashboard: React.FC<MenuDashboardProps> = ({
-  isOpen, onClose, user, onLogout,
+  isOpen,
+  onClose,
+  user,
+  onLogout,
 }) => {
   const navigate = useNavigate();
   const [localUser, setLocalUser] = useState<UserProfile | null>(null);
@@ -75,6 +86,8 @@ const MenuDashboard: React.FC<MenuDashboardProps> = ({
     { to: "/areas-comunes", label: "Áreas Comunes", icon: <Building size={20} /> },
     { to: "/finanzas", label: "Finanzas", icon: <DollarSign size={20} /> },
     { to: "/mantenimiento", label: "Mantenimiento", icon: <Wrench size={20} /> },
+    // Nuevo item: Comunicación (manteniendo el estilo y responsive)
+    { to: "/comunicacion", label: "Comunicación", icon: <MessageSquareText size={20} /> },
     { to: "/reportes", label: "Reportes", icon: <BarChart3 size={20} /> },
     { to: "/seguridad", label: "Seguridad", icon: <Shield size={20} /> },
     { to: "/autenticacion-seguridad", label: "Autenticación y Seguridad", icon: <ShieldCheck size={20} /> },
