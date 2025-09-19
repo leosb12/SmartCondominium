@@ -29,5 +29,8 @@ urlpatterns = [
 
     path("", include("backendapi.expensas.urls")),
 
+    path("reportesfinanza/", include("backendapi.reportefinanza.urls")),
+
+
 
 ]
