@@ -41,14 +41,12 @@ export interface ExpensasGenerationResponse extends ApiResponse<{
 }> {}
 
 class FinanceService {
-  private baseUrl = "/admin/finanzas";
-
   /**
    * Crear nueva tarifa por m²
    */
   async createTarifa(monto: number): Promise<TarifaResponse> {
     try {
-      const response = await api.post(`${this.baseUrl}/tarifa`, { monto });
+      const response = await api.post("/admin/finanzas/tarifa", { monto });
       return response.data;
     } catch (error: any) {
       throw new Error(
@@ -62,7 +60,7 @@ class FinanceService {
    */
   async getTarifaVigente(): Promise<TarifaResponse> {
     try {
-      const response = await api.get(`${this.baseUrl}/tarifa/vigente`);
+      const response = await api.get("/admin/finanzas/tarifa/vigente");
       return response.data;
     } catch (error: any) {
       throw new Error(
@@ -80,7 +78,7 @@ class FinanceService {
     descripcion: string = ""
   ): Promise<ExtraordinariaResponse> {
     try {
-      const response = await api.post(`${this.baseUrl}/extraordinaria`, {
+      const response = await api.post("/admin/finanzas/extraordinaria", {
         periodo,
         total_monto: totalMonto,
         descripcion,
@@ -98,7 +96,7 @@ class FinanceService {
    */
   async getExtraordinaria(periodo: string): Promise<ExtraordinariaResponse> {
     try {
-      const response = await api.get(`${this.baseUrl}/extraordinaria`, {
+      const response = await api.get("/admin/finanzas/extraordinaria", {
         params: { periodo },
       });
       return response.data;
@@ -114,7 +112,7 @@ class FinanceService {
    */
   async generarExpensasHoy(): Promise<ExpensasGenerationResponse> {
     try {
-      const response = await api.post(`${this.baseUrl}/expensas/generar-hoy`);
+      const response = await api.post("/admin/finanzas/expensas/generar-hoy");
       return response.data;
     } catch (error: any) {
       throw new Error(
@@ -128,7 +126,7 @@ class FinanceService {
    */
   async testDatabase(): Promise<any> {
     try {
-      const response = await api.get(`${this.baseUrl}/debug/database-test`);
+      const response = await api.get("/admin/finanzas/debug/database-test");
       return response.data;
     } catch (error: any) {
       throw new Error(
