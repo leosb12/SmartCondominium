@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "corsheaders",
-    "drf_spectacular",  # Para documentación OpenAPI
     "backendapi",
 ]
 
@@ -115,18 +114,3 @@ CORS_ALLOWED_ORIGINS = [
 
 # 👉 Solo para debug: permitir todos (desactivar en prod)
 # CORS_ALLOW_ALL_ORIGINS = True
-
-# ====== Django REST Framework ======
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    'DEFAULT_AUTHENTICATION_CLASSES': [],
-    'DEFAULT_PERMISSION_CLASSES': [],
-}
-
-# ====== DRF Spectacular (OpenAPI) ======
-SPECTACULAR_SETTINGS = {
-    'TITLE': 'SmartCondominium API',
-    'DESCRIPTION': 'API para gestión de condominios inteligentes',
-    'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
-}
