@@ -2,7 +2,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ChevronRight,
+
   Plus,
   CreditCard,
   X,
@@ -122,19 +122,6 @@ export default function GestionarExpensa() {
     }
   };
 
-  const openDetail = async (e: Expensa) => {
-    setSelected(e);
-    try {
-      const hist = await expensaService.historial(e.id);
-      setHistorial(hist);
-    } catch (e: unknown) {
-      setToast({
-        kind: "error",
-        title: "No se pudo cargar el historial",
-        message: errMsg(e),
-      });
-    }
-  };
 
   const handlePay = async () => {
     if (!selected) return;
@@ -318,14 +305,6 @@ export default function GestionarExpensa() {
                     >
                       {e.estado || "-"}
                     </span>
-                  </Td>
-                  <Td>
-                    <button
-                      onClick={() => openDetail(e)}
-                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 flex items-center gap-2"
-                    >
-                      Ver <ChevronRight className="w-4 h-4" />
-                    </button>
                   </Td>
                 </tr>
               ))}

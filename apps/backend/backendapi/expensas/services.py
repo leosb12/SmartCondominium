@@ -1,4 +1,5 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
+from datetime import date, datetime
 from django.utils import timezone
 from core.supabase_client import supabase_admin as sb
 
@@ -34,6 +35,13 @@ def get_expensa(expensa_id: int) -> Optional[Dict[str, Any]]:
     return q.execute().data
 
 
+def _iso(value: Union[str, date, datetime]) -> str:
+    """Devuelve una cadena ISO. Acepta 'YYYY-MM-DD' ya formateado o date/datetime."""
+    if isinstance(value, (date, datetime)):
+        return value.isoformat()
+    return str(value).strip()
+
+
 def create_expensa(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     Inserta una expensa y devuelve el registro (usando get_expensa para enriquecer estado).
@@ -41,11 +49,11 @@ def create_expensa(payload: Dict[str, Any]) -> Dict[str, Any]:
     """
     to_insert = {
         "propiedad_id": int(payload["propiedad_id"]),
-        "fecha": payload["fecha"].isoformat(),
+        "fecha": _iso(payload["fecha"]),
         "total": str(payload["total"]),
         "created_at": timezone.now().isoformat(),
         "tarifa_id": int(payload["tarifa_id"]),
-        "fecha_vencimiento": payload["fecha_vencimiento"].isoformat(),
+        "fecha_vencimiento": _iso(payload["fecha_vencimiento"]),
     }
 
     res = sb.table("expensas").insert(to_insert).execute()
@@ -59,20 +67,43 @@ def create_expensa(payload: Dict[str, Any]) -> Dict[str, Any]:
 def abonar_expensa(
     expensa_id: int, monto: float, user_uuid: Optional[str]
 ) -> Dict[str, Any]:
-    rpc = sb.rpc(
-        "sp_registrar_abono_expensa",
-        {
-            "_expensa_id": int(expensa_id),
-            "_monto": str(monto),
-            "_id_usuario": user_uuid,
-            "_estado_pago_id": ESTADO_PAGO_REG,
-            "_tipo_pago_id": TIPO_PAGO_EXPENSA,
-        },
-    ).execute()
-    if getattr(rpc, "data", None) is None:
-        raise ValueError("No se pudo registrar el abono.")
+    """
+    Llama a la RPC sp_registrar_abono_expensa, probando ambas variantes de nombres
+    de parámetros (con y sin guion bajo) y devolviendo un error legible si falla.
+    """
+    if not expensa_id or not (monto and float(monto) > 0):
+        raise ValueError("Expensa y monto son obligatorios.")
+
+    # Si no llega un UUID, usamos uno anónimo para evitar NOT NULL en la función SQL
+    uid = (user_uuid or "00000000-0000-0000-0000-000000000000").strip()
+
+    # Intento 1: firma con guion bajo
+    args_underscore = {
+        "_expensa_id": int(expensa_id),
+        "_monto": str(monto),
+        "_id_usuario": uid,
+        "_estado_pago_id": ESTADO_PAGO_REG,
+        "_tipo_pago_id": TIPO_PAGO_EXPENSA,
+    }
+    resp = sb.rpc("sp_registrar_abono_expensa", args_underscore).execute()
+
+    # Si no hay 'data', probamos la firma sin guion bajo
+    if not getattr(resp, "data", None):
+        args_plain = {
+            "expensa_id": int(expensa_id),
+            "monto": str(monto),
+            "id_usuario": uid,
+            "estado_pago_id": ESTADO_PAGO_REG,
+            "tipo_pago_id": TIPO_PAGO_EXPENSA,
+        }
+        resp2 = sb.rpc("sp_registrar_abono_expensa", args_plain).execute()
+        if not getattr(resp2, "data", None):
+            err_msg = getattr(resp2, "error", None) or getattr(resp, "error", None)
+            raise RuntimeError(f"No se pudo registrar el abono. {err_msg or ''}".strip())
+        resp = resp2
+
     nuevo_estado = get_expensa(expensa_id)
-    return {"resultado": rpc.data, "expensa": nuevo_estado}
+    return {"resultado": resp.data, "expensa": nuevo_estado}
 
 
 def listar_pagos_expensa(expensa_id: int) -> List[Dict[str, Any]]:
@@ -99,7 +130,7 @@ def listar_pagos_expensa(expensa_id: int) -> List[Dict[str, Any]]:
         or []
     )
     pago_ids = list({c["pago_id"] for c in cargos if c.get("pago_id")})
-    pagos_map = {}
+    pagos_map: Dict[Any, Dict[str, Any]] = {}
     if pago_ids:
         pagos = (
             sb.table("pagos")
