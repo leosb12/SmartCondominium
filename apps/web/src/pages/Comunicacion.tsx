@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, History } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 
 const Card: React.FC<{
@@ -36,16 +36,24 @@ const Comunicacion: React.FC = () => {
     >
       {/* Hero */}
       <div className="mb-8 rounded-2xl border border-slate-800/60 bg-gradient-to-r from-blue-950/60 via-slate-900 to-slate-950 p-8">
-        <p className="text-slate-300">Gestiona la comunicación entre administración y residentes</p>
+        <p className="text-slate-300">
+          Gestiona la comunicación entre administración y residentes
+        </p>
       </div>
 
-      {/* Grid responsive (solo una card por ahora) */}
+      {/* Grid responsive */}
       <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
         <Card
           icon={<MessageSquareText className="h-7 w-7 text-blue-400" />}
           title="Mensajes"
           desc="Envía, recibe y administra mensajes y avisos del condominio."
           onClick={() => navigate("mensajes")}
+        />
+        <Card
+          icon={<History className="h-7 w-7 text-blue-400" />}
+          title="Historial de Comunicados"
+          desc="Consulta los comunicados publicados previamente, ordenados por fecha."
+          onClick={() => navigate("historial")}
         />
       </div>
     </DashboardLayout>

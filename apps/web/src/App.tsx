@@ -42,7 +42,7 @@ export default function App() {
           <Route path="/gestionrol" element={<GestionRoles />} />
           <Route path="/comunicacion" element={<Comunicacion />} />
           <Route path="/comunicacion/mensajes" element={<Mensajes />} />
-          <Route path="/reportes/reporte-finanza" element={<ReporteFinanza />} />
+          <Route path="/finanzas/reporte-finanza" element={<ReporteFinanza />} />
           <Route path="/finanzas/gestionar-multas-expensas" element={<GestionarMultasExpensas />} />
         </Route>
       </Routes>
