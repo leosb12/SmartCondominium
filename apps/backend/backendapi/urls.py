@@ -20,10 +20,10 @@ urlpatterns = [
 
     # URLs MFA
     path("mfa/", include("backendapi.mfa_urls")),
-    
+
     # URLs Gestión de Roles
     path("roles/", include("backendapi.roles.urls")),
-    
+
     # URLs Administración de Finanzas
     path("admin/finanzas/", include("backendapi.finance_admin.urls")),
 
@@ -31,6 +31,7 @@ urlpatterns = [
 
     path("reportesfinanza/", include("backendapi.reportefinanza.urls")),
 
+    path("", include("backendapi.mensaje.urls")),
 
-
+    path("users/", views.users, name="users"),
 ]

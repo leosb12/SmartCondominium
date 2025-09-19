@@ -286,11 +286,101 @@ def me(request):
             full_name = md.get("full_name") or md.get("name") or ""
 
         return ok({
+            "id": str(getattr(u, "id", "")),  # <- añadido
             "email": getattr(u, "email", ""),
             "full_name": full_name or getattr(u, "email", ""),
         })
     except Exception as e:
         return bad(f"Excepción en /me: {str(e)}", 500)
+
+@csrf_exempt
+def users(request):
+    """
+    GET /api/users/
+    Lista de usuarios con:
+      - id: UUID (de Supabase) — debe coincidir con emisor_id/receptor_id en la tabla mensaje
+      - full_name: a partir de public.profiles (first_name + last_name)
+      - email: desde Supabase Auth (admin)
+
+    Requiere Authorization: Bearer <access_token>
+    """
+    if request.method != "GET":
+        return bad("Método no permitido", 405)
+
+    # 1) Validar sesión con el access_token (igual que en /me)
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return bad("Falta token (Authorization: Bearer <token>)", 401)
+
+    access_token = auth.split(" ", 1)[1].strip()
+    try:
+        res = supabase.auth.get_user(access_token)
+        u = getattr(res, "user", None)
+        if not u:
+            return bad("Token inválido o expirado", 401)
+    except Exception as e:
+        return bad(f"Excepción validando token: {str(e)}", 500)
+
+    try:
+        # 2) Traer perfiles (public.profiles)
+        prof_res = (
+            supabase_admin.table("profiles")
+            .select("id,first_name,last_name")
+            .execute()
+        )
+        profiles = prof_res.data or []
+
+        # 3) Construir índice de emails desde Auth Admin (si disponible)
+        emails_by_id = {}
+
+        try:
+            # Supabase Admin API (service role)
+            # Nota: La forma exacta del response puede variar por versión del SDK de supabase-py.
+            # Manejamos varios posibles formatos de retorno.
+            admin_list = supabase_admin.auth.admin.list_users()
+
+            users_payload = None
+            # Posibles formas
+            if hasattr(admin_list, "data"):
+                users_payload = getattr(admin_list, "data")
+                # data puede traer {"users": [...]}
+                if isinstance(users_payload, dict) and "users" in users_payload:
+                    users_payload = users_payload["users"]
+            elif isinstance(admin_list, dict):
+                users_payload = admin_list.get("users") or admin_list.get("data") or []
+
+            if users_payload is None:
+                users_payload = []
+
+            for item in users_payload:
+                # item puede ser objeto o dict
+                uid = getattr(item, "id", None) or (isinstance(item, dict) and item.get("id"))
+                email = getattr(item, "email", None) or (isinstance(item, dict) and item.get("email"))
+                if uid:
+                    emails_by_id[str(uid)] = email or ""
+        except Exception:
+            # Si falla Auth Admin, devolvemos sin email (el frontend seguirá mostrando nombres)
+            emails_by_id = {}
+
+        # 4) Armar respuesta
+        out = []
+        for p in profiles:
+            uid = str(p.get("id"))
+            first = (p.get("first_name") or "").strip()
+            last = (p.get("last_name") or "").strip()
+            full = f"{first} {last}".strip()
+
+            email = emails_by_id.get(uid, "")
+            out.append({
+                "id": uid,
+                "full_name": full or email or uid,
+                "email": email,
+            })
+
+        return ok(out)
+
+    except Exception as e:
+        return bad(f"Excepción en /users: {str(e)}", 500)
 
 
 # -----------------------------
@@ -360,3 +450,5 @@ class CargoMultaViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CargoMulta.objects.all()
     serializer_class = CargoMultaSerializer
     permission_classes = [permissions.AllowAny]
+
+
