@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "backendapi",
-    "backendapi.expensas"
+    "backendapi.expensas",
+    "backendapi.mensaje",
 ]
 
 # ====== Middleware ======
