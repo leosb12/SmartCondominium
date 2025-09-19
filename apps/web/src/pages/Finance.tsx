@@ -57,8 +57,8 @@ const Finance: React.FC = () => {
         <Card
           icon={<BarChart3 className="h-7 w-7 text-blue-400" />}
           title="Reportes financieros"
-          desc="Visualiza ingresos, egresos y morosidad (próximamente)."
-          onClick={() => {}}
+          desc="Crea reportes de ingresos y morosidad con filtros por rango de fechas, propiedades y estados."
+          onClick={() => navigate("reporte-finanza")}
         />
         <Card
           icon={<FileText className="h-7 w-7 text-blue-400" />}
