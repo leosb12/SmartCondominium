@@ -16,6 +16,8 @@ import AdministrarCuotas from "./pages/AdministrarCuotas";
 import GestionarExpensas from "./pages/GestionarExpensa";
 import Reportes from "./pages/reportes";
 import ReporteFinanza from "./pages/ReporteFinanza";
+import Comunicacion from "./pages/Comunicacion";
+import Mensajes from "./pages/Mensajes"
 
 export default function App() {
   return (
@@ -38,6 +40,8 @@ export default function App() {
           <Route path="/finanzas/administrar-cuotas" element={<AdministrarCuotas />} />
           <Route path="/autenticacion-seguridad" element={<AutenticacionSeguridad />} />
           <Route path="/gestionrol" element={<GestionRoles />} />
+          <Route path="/comunicacion" element={<Comunicacion />} />
+          <Route path="/comunicacion/mensajes" element={<Mensajes />} />
           <Route path="/reportes/reporte-finanza" element={<ReporteFinanza />} />
           <Route path="/finanzas/gestionar-multas-expensas" element={<GestionarMultasExpensas />} />
         </Route>
