@@ -319,14 +319,6 @@ export default function GestionarExpensa() {
                       {e.estado || "-"}
                     </span>
                   </Td>
-                  <Td>
-                    <button
-                      onClick={() => openDetail(e)}
-                      className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 flex items-center gap-2"
-                    >
-                      Ver <ChevronRight className="w-4 h-4" />
-                    </button>
-                  </Td>
                 </tr>
               ))}
               {expensas.length === 0 && (
