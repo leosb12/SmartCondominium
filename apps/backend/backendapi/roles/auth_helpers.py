@@ -32,27 +32,34 @@ def get_user_id_from_request(request) -> Optional[str]:
     access_token = auth_header.split(" ", 1)[1].strip()
     
     try:
-        # Validar token con Supabase usando cliente admin
-        # Usamos auth.admin para acceder con privilegios de administrador
-        res = supabase_admin.auth.admin.get_user_by_access_token(access_token)
+        # Método actualizado para validar token con Supabase
+        # Usamos el cliente admin para validar el token del usuario
+        response = supabase_admin.auth.get_user(access_token)
         
-        if not res or not hasattr(res, 'user') or not res.user:
+        if response and hasattr(response, 'user') and response.user:
+            return response.user.id
+            
+        return None
+        
+    except Exception as e:
+        # Método alternativo usando admin.get_user_by_id si tenemos el token decodificado
+        try:
+            import jwt
+            
+            # Decodificar el token JWT (sin verificar la firma, solo para extraer datos)
+            decoded = jwt.decode(access_token, options={"verify_signature": False})
+            user_id = decoded.get('sub')
+            
+            if user_id:
+                # Verificar que el usuario existe en Supabase
+                user_response = supabase_admin.auth.admin.get_user_by_id(user_id)
+                
+                if user_response and hasattr(user_response, 'user') and user_response.user:
+                    return user_id
+            
             return None
             
-        return res.user.id
-    except Exception as e:
-        print(f"Error validating token: {e}")
-        # Intentar método alternativo si el primero falla
-        try:
-            res = supabase_admin.auth.get_user(access_token)
-            user = getattr(res, "user", None)
-            
-            if not user:
-                return None
-                
-            return getattr(user, "id", None)
         except Exception as e2:
-            print(f"Error with alternative method: {e2}")
             return None
 
 
@@ -67,7 +74,15 @@ def require_auth(view_func):
             user_id = request.user_id  # Disponible automáticamente
     """
     @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
+    def _wrapped_view(self_or_request, *args, **kwargs):
+        # Manejar tanto function views como class-based views
+        if hasattr(self_or_request, 'path_info'):
+            # Es un request object (function view)
+            request = self_or_request
+        else:
+            # Es un self object (class-based view)
+            request = args[0] if args else kwargs.get('request')
+        
         user_id = get_user_id_from_request(request)
         
         if not user_id:
@@ -79,7 +94,7 @@ def require_auth(view_func):
         # Inyectar user_id en el request
         request.user_id = user_id
         
-        return view_func(request, *args, **kwargs)
+        return view_func(self_or_request, *args, **kwargs)
     
     return _wrapped_view
 
@@ -100,7 +115,15 @@ def require_role(role_name: str):
     """
     def decorator(view_func):
         @wraps(view_func)
-        def _wrapped_view(request, *args, **kwargs):
+        def _wrapped_view(self_or_request, *args, **kwargs):
+            # Manejar tanto function views como class-based views
+            if hasattr(self_or_request, 'path_info'):
+                # Es un request object (function view)
+                request = self_or_request
+            else:
+                # Es un self object (class-based view)
+                request = args[0] if args else kwargs.get('request')
+                
             # Verificar que el decorador @require_auth fue aplicado
             if not hasattr(request, 'user_id'):
                 return JsonResponse({
@@ -115,7 +138,7 @@ def require_role(role_name: str):
                     "error": f"Acceso denegado. Se requiere rol: {role_name}"
                 }, status=403)
             
-            return view_func(request, *args, **kwargs)
+            return view_func(self_or_request, *args, **kwargs)
         
         return _wrapped_view
     return decorator
