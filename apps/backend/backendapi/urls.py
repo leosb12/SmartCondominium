@@ -27,6 +27,9 @@ urlpatterns = [
     # URLs Administración de Finanzas
     path("admin/finanzas/", include("backendapi.finance_admin.urls")),
 
+    # URLs Reservas de Áreas Sociales
+    path("reservas/", include("backendapi.reservas.urls")),
+
     path("", include("backendapi.expensas.urls")),
 
     path("reportesfinanza/", include("backendapi.reportefinanza.urls")),
@@ -34,4 +37,6 @@ urlpatterns = [
     path("", include("backendapi.mensaje.urls")),
 
     path("users/", views.users, name="users"),
+
+    path("mantenimiento/", include("backendapi.mantenimiento.urls")),
 ]
