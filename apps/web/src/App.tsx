@@ -24,6 +24,7 @@ import MisReservas from "./pages/MisReservas";
 import Mantenimiento from "./pages/Mantenimiento";
 import ProgramarPreventivo from "./pages/ProgramarPreventivo";
 import AsignarTareas from "./pages/AsignarTareas";
+import HistorialComunicados from "./pages/HistorialComunicados";
 
 export default function App() {
   return (
@@ -56,6 +57,7 @@ export default function App() {
           <Route path="/mantenimiento" element={<Mantenimiento />} />
           <Route path="/mantenimiento/programar-preventivo" element={<ProgramarPreventivo />} />
           <Route path="/mantenimiento/asignar-tareas" element={<AsignarTareas />} />
+          <Route path="/comunicacion/historial" element={<HistorialComunicados />} />
         </Route>
       </Routes>
     </BrowserRouter>
