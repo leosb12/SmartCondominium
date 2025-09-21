@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { MessageSquareText, History } from "lucide-react";
+import { MessageSquareText, History, Megaphone } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import { useRoles } from "../hooks/useRoles";
 
 const Card: React.FC<{
   icon: React.ReactNode;
@@ -27,6 +28,7 @@ const Card: React.FC<{
 
 const Comunicacion: React.FC = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useRoles();
 
   return (
     <DashboardLayout
@@ -55,6 +57,14 @@ const Comunicacion: React.FC = () => {
           desc="Consulta los comunicados publicados previamente, ordenados por fecha."
           onClick={() => navigate("historial")}
         />
+        {isAdmin && (
+          <Card
+            icon={<Megaphone className="h-7 w-7 text-blue-400" />}
+            title="Nuevo Comunicado"
+            desc="Crea y publica un comunicado ahora o prográmalo  para más tarde."
+            onClick={() => navigate("agregarcomunicado")}
+          />
+        )}
       </div>
     </DashboardLayout>
   );

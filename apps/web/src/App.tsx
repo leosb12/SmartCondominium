@@ -26,6 +26,7 @@ import ProgramarPreventivo from "./pages/ProgramarPreventivo";
 import AsignarTareas from "./pages/AsignarTareas";
 import HistorialComunicados from "./pages/HistorialComunicados";
 import ReportesAreasComunes from "./pages/ReportesAreasComunes";
+import AgregarComunicado from "./pages/AgregarComunicado";
 
 export default function App() {
   return (
@@ -60,7 +61,7 @@ export default function App() {
           <Route path="/mantenimiento/asignar-tareas" element={<AsignarTareas />} />
           <Route path="/comunicacion/historial" element={<HistorialComunicados />} />
           <Route path="/reportes/areas-comunes" element={<ReportesAreasComunes />} />
-
+          <Route path="/comunicacion/agregarcomunicado" element={<AgregarComunicado />} />
         </Route>
       </Routes>
     </BrowserRouter>
