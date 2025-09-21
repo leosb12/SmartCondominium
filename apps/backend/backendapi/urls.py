@@ -44,5 +44,9 @@ urlpatterns = [
 
     path("", include("backendapi.ReporteAreasComunes.urls")),
 
+    # Estado de Órdenes de Trabajo
+    path("orden-trabajo-estado/", include("backendapi.orden_trabajo_estado.urls")),
+
+    # Comunicados
     path("comunicados/", include("backendapi.comunicados.urls")),
 ]
