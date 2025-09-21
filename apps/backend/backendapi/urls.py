@@ -41,4 +41,6 @@ urlpatterns = [
     path("mantenimiento/", include("backendapi.mantenimiento.urls")),
 
     path("", include("backendapi.historialComunicados.urls")),
+
+    path("", include("backendapi.ReporteAreasComunes.urls")),
 ]

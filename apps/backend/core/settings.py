@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "backendapi.expensas",
     "backendapi.mensaje",
     "backendapi.historialComunicados",
+    "backendapi.ReporteAreasComunes",
 ]
 
 # ====== Middleware ======
