@@ -1,11 +1,15 @@
-// src/pages/AreasComunes.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { MapPin, Plus, Calendar } from "lucide-react";
+import { MapPin, Plus, Calendar, BarChart3 } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useAdminCheck } from "../hooks/useRoles";
 
-const Card: React.FC<{icon: React.ReactNode; title: string; desc: string; onClick: () => void;}> = ({ icon, title, desc, onClick }) => (
+const Card: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  onClick: () => void;
+}> = ({ icon, title, desc, onClick }) => (
   <button
     onClick={onClick}
     className="group flex flex-col items-start rounded-2xl border border-slate-800/70 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-xl hover:from-blue-950 hover:to-slate-900 hover:border-blue-600/60 transition-all duration-300 text-left"
@@ -46,13 +50,24 @@ const AreasComunes: React.FC = () => {
             onClick={() => navigate("/registrar-area-comun")}
           />
         )}
-        
+
+        {/* Card visible para todos */}
         <Card
           icon={<Calendar className="h-7 w-7 text-blue-400" />}
           title="Mis Reservas"
           desc="Consulta y gestiona tus reservas de áreas sociales"
           onClick={() => navigate("/mis-reservas")}
         />
+
+        {/* Nueva card: Reporte (solo admins) */}
+        {isAdmin && (
+          <Card
+            icon={<BarChart3 className="h-7 w-7 text-blue-400" />}
+            title="Reporte de Áreas Comunes"
+            desc="Analiza utilización e ingresos de las áreas"
+            onClick={() => navigate("/reportes/areas-comunes")}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
