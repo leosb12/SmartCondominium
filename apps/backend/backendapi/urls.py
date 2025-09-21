@@ -39,4 +39,6 @@ urlpatterns = [
     path("users/", views.users, name="users"),
 
     path("mantenimiento/", include("backendapi.mantenimiento.urls")),
+
+    path("", include("backendapi.historialComunicados.urls")),
 ]
