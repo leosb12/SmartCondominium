@@ -1,11 +1,16 @@
-// src/pages/Mantenimiento.tsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Wrench, CalendarPlus, UserCog, Settings } from "lucide-react";
+import { Wrench, CalendarPlus, UserCog, Settings, ClipboardCheck } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useRoles } from "../hooks/useRoles";
+import { roleService, type Role } from "../services/roleService";
 
-const Card: React.FC<{icon: React.ReactNode; title: string; desc: string; onClick: () => void;}> = ({ icon, title, desc, onClick }) => (
+const Card: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  onClick: () => void;
+}> = ({ icon, title, desc, onClick }) => (
   <button
     onClick={onClick}
     className="group flex flex-col items-start rounded-2xl border border-slate-800/70 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-xl hover:from-blue-950 hover:to-slate-900 hover:border-blue-600/60 transition-all duration-300 text-left"
@@ -20,9 +25,32 @@ const Card: React.FC<{icon: React.ReactNode; title: string; desc: string; onClic
   </button>
 );
 
+const ALLOWED_ROLE_IDS_FOR_ESTADO = new Set<number>([1, 5, 6]); // admin + mantenimiento interno/externo
+
 const Mantenimiento: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin } = useRoles();
+
+  // Permiso SOLO para la card "Actualizar estado de mantenimiento"
+  const [canUpdateEstado, setCanUpdateEstado] = useState<boolean>(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const roles: Role[] = await roleService.getMyRoles();
+        const allowed = roles?.some((r) => ALLOWED_ROLE_IDS_FOR_ESTADO.has(r.id));
+        if (alive) setCanUpdateEstado(Boolean(allowed));
+      } catch {
+        if (alive) setCanUpdateEstado(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const showRestricted = !isAdmin && !canUpdateEstado;
 
   return (
     <DashboardLayout
@@ -35,9 +63,19 @@ const Mantenimiento: React.FC = () => {
         <p className="text-slate-300">Centro de gestión de mantenimiento del condominio</p>
       </div>
 
-      {/* Grid responsive real */}
+      {/* Grid responsive */}
       <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-        {/* Cards solo para administradores */}
+        {/* Card visible para roles 1,5,6 */}
+        {canUpdateEstado && (
+          <Card
+            icon={<ClipboardCheck className="h-7 w-7 text-blue-400" />}
+            title="Actualizar Estado de Mantenimiento"
+            desc="Consulta y actualiza el estado de las órdenes de trabajo de forma rápida."
+            onClick={() => navigate("/estado-mantenimiento")}
+          />
+        )}
+
+        {/* Cards SOLO para administradores (id 1) */}
         {isAdmin && (
           <>
             <Card
@@ -46,7 +84,6 @@ const Mantenimiento: React.FC = () => {
               desc="Crea y programa ordenes de trabajo preventivo con asignación de personal."
               onClick={() => navigate("/mantenimiento/programar-preventivo")}
             />
-            
             <Card
               icon={<UserCog className="h-7 w-7 text-blue-400" />}
               title="Asignar Tarea"
@@ -55,15 +92,15 @@ const Mantenimiento: React.FC = () => {
             />
           </>
         )}
-        
-        {/* Mensaje cuando no es admin */}
-        {!isAdmin && (
+
+        {/* Mensaje cuando no pertenece a ningún rol permitido */}
+        {showRestricted && (
           <div className="col-span-full text-center py-12">
             <div className="rounded-2xl border border-slate-800/60 bg-gradient-to-r from-slate-900/60 via-slate-900 to-slate-950 p-8">
               <Settings className="h-12 w-12 text-slate-500 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-slate-300 mb-2">Acceso Restringido</h3>
               <p className="text-slate-400">
-                Solo los administradores pueden acceder a las funciones de mantenimiento.
+                Esta sección es solo para administradores o personal de mantenimiento autorizado.
               </p>
             </div>
           </div>
