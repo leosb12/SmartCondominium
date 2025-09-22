@@ -7,6 +7,7 @@ import {
   Settings,
   ClipboardCheck,
   BadgeDollarSign,
+  MessageSquare, // nuevo ícono para Historial de Comunicados
 } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useRoles } from "../hooks/useRoles";
@@ -40,7 +41,7 @@ const Mantenimiento: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin } = useRoles();
 
-  // Permiso SOLO para las cards de mantenimiento visibles a roles 1,5,6
+  // Permiso SOLO para las cards visibles a roles 1,5,6
   const [canUpdateEstado, setCanUpdateEstado] = useState<boolean>(false);
 
   useEffect(() => {
@@ -88,6 +89,13 @@ const Mantenimiento: React.FC = () => {
               title="Costo de materiales y mano de obra"
               desc="Registra y consulta los costos asociados a cada orden de trabajo."
               onClick={() => navigate("/costo_material")}
+            />
+            {/* Nueva card: Historial de Mantenimientos(roles 1,5,6) */}
+            <Card
+              icon={<MessageSquare className="h-7 w-7 text-blue-400" />}
+              title="Historial de Mantenimientos"
+              desc="Revisa todos los mantenimientos y trabajos realizados por el personal"
+              onClick={() => navigate("/historial-mantenimiento")}
             />
           </>
         )}

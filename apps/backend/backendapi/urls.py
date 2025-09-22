@@ -52,4 +52,7 @@ urlpatterns = [
 
     # Costo de materiales y mano de obra
     path("costo-material/", include("backendapi.costo_material.urls")),
+
+# Historial de Mantenimiento (nuevo, sin VIEW)
+    path("historial-mantenimiento/", include("backendapi.HistorialMantenimientos.urls")),
 ]
