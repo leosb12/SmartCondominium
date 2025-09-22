@@ -55,4 +55,8 @@ urlpatterns = [
 
 # Historial de Mantenimiento (nuevo, sin VIEW)
     path("historial-mantenimiento/", include("backendapi.HistorialMantenimientos.urls")),
+
+    # backendapi/urls.py (además de lo que ya tienes)
+    path("finanzas/", include("backendapi.EstadoCuenta.urls")),
+    path("pagos/", include("backendapi.Pagos.urls")),
 ]
