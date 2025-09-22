@@ -49,4 +49,7 @@ urlpatterns = [
 
     # Comunicados
     path("comunicados/", include("backendapi.comunicados.urls")),
+
+    # Costo de materiales y mano de obra
+    path("costo-material/", include("backendapi.costo_material.urls")),
 ]
