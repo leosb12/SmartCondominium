@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Wrench, CalendarPlus, UserCog, Settings, ClipboardCheck } from "lucide-react";
+import {
+  Wrench,
+  CalendarPlus,
+  UserCog,
+  Settings,
+  ClipboardCheck,
+  BadgeDollarSign,
+} from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useRoles } from "../hooks/useRoles";
 import { roleService, type Role } from "../services/roleService";
@@ -19,7 +26,9 @@ const Card: React.FC<{
       <div className="grid h-14 w-14 place-items-center rounded-xl bg-blue-600/20 ring-1 ring-inset ring-blue-500/30 group-hover:scale-110 transition-transform">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold text-slate-100 group-hover:text-blue-400">{title}</h3>
+      <h3 className="text-xl font-semibold text-slate-100 group-hover:text-blue-400">
+        {title}
+      </h3>
     </div>
     <p className="mt-3 text-slate-400 text-sm">{desc}</p>
   </button>
@@ -31,7 +40,7 @@ const Mantenimiento: React.FC = () => {
   const navigate = useNavigate();
   const { isAdmin } = useRoles();
 
-  // Permiso SOLO para la card "Actualizar estado de mantenimiento"
+  // Permiso SOLO para las cards de mantenimiento visibles a roles 1,5,6
   const [canUpdateEstado, setCanUpdateEstado] = useState<boolean>(false);
 
   useEffect(() => {
@@ -65,14 +74,22 @@ const Mantenimiento: React.FC = () => {
 
       {/* Grid responsive */}
       <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-        {/* Card visible para roles 1,5,6 */}
+        {/* Cards visibles para roles 1,5,6 */}
         {canUpdateEstado && (
-          <Card
-            icon={<ClipboardCheck className="h-7 w-7 text-blue-400" />}
-            title="Actualizar Estado de Mantenimiento"
-            desc="Consulta y actualiza el estado de las órdenes de trabajo de forma rápida."
-            onClick={() => navigate("/estado-mantenimiento")}
-          />
+          <>
+            <Card
+              icon={<ClipboardCheck className="h-7 w-7 text-blue-400" />}
+              title="Actualizar Estado de Mantenimiento"
+              desc="Consulta y actualiza el estado de las órdenes de trabajo de forma rápida."
+              onClick={() => navigate("/estado-mantenimiento")}
+            />
+            <Card
+              icon={<BadgeDollarSign className="h-7 w-7 text-blue-400" />}
+              title="Costo de materiales y mano de obra"
+              desc="Registra y consulta los costos asociados a cada orden de trabajo."
+              onClick={() => navigate("/costo_material")}
+            />
+          </>
         )}
 
         {/* Cards SOLO para administradores (id 1) */}
