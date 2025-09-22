@@ -98,4 +98,58 @@ class Api {
     if (!b.startsWith('/')) b = '/$b';
     return '$a$b';
   }
+
+  // ============================================================
+  // =============  MÉTODOS NUEVOS (FINANZAS)  ==================
+  // ============================================================
+
+  /// CU-08: Consultar estado de cuenta
+  Future<Response> getEstadoCuenta({
+    int? propiedadId,
+    String? tipo, // "expensa" | "reserva" | "multa"
+    String? estado, // "pendiente" | "vencida" | "pagada"
+    String? desde, // "YYYY-MM-DD"
+    String? hasta, // "YYYY-MM-DD"
+    int page = 1,
+    int pageSize = 50,
+    String orden = "vencimiento",
+  }) {
+    final qp = {
+      if (propiedadId != null) 'propiedad_id': '$propiedadId',
+      if (tipo != null) 'tipo': tipo,
+      if (estado != null) 'estado': estado,
+      if (desde != null) 'desde': desde,
+      if (hasta != null) 'hasta': hasta,
+      'page': '$page',
+      'page_size': '$pageSize',
+      'orden': orden,
+    };
+    return dio.get('/finanzas/estado', queryParameters: qp);
+  }
+
+  /// CU-09: Crear orden de pago (Stripe test) — el webhook escribe en BD
+  Future<Response> crearOrdenPago({
+    required String tipo, // "expensa" | "reserva" | "multa"
+    required int id,
+    double? montoParcial,
+  }) {
+    final body = {
+      'tipo': tipo,
+      'id': id,
+      if (montoParcial != null) 'monto_parcial': montoParcial,
+    };
+    return dio.post('/pagos/orden', data: body);
+  }
+
+  // core/api.dart (añadir al final donde están los métodos nuevos)
+  /// Lista de comprobantes Stripe (recibos) para un documento.
+  Future<Response> getComprobantes({
+    required String tipo, // "expensa" | "reserva" | "multa"
+    required int id,
+  }) {
+    return dio.get(
+      '/pagos/comprobantes',
+      queryParameters: {'tipo': tipo, 'id': '$id'},
+    );
+  }
 }
