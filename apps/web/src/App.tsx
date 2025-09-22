@@ -29,6 +29,7 @@ import ReportesAreasComunes from "./pages/ReportesAreasComunes";
 import EstadoMantenimiento from "./pages/EstadoMantenimiento";
 import AgregarComunicado from "./pages/AgregarComunicado";
 import CostoMaterial from   "./pages/Costo_Material.tsx"
+import HistorialMantenimiento from  "./pages/HistorialMantenimiento"
 
 export default function App() {
   return (
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="/estado-mantenimiento" element={<EstadoMantenimiento />} />
           <Route path="/comunicacion/agregarcomunicado" element={<AgregarComunicado />} />
           <Route path="/costo_material" element={<CostoMaterial />} />
+          <Route path="/historial-mantenimiento" element={<HistorialMantenimiento />} />
         </Route>
       </Routes>
     </BrowserRouter>
