@@ -1,93 +1,67 @@
-// apps/mobile/lib/main.dart
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'env.dart';
+import 'core/api.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/home_screen.dart';
+import 'screens/placeholder_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+class Routes {
+  static const login = '/login';
+  static const register = '/register';
+
+  // Tu “Home” con menú (dashboard de la app)
+  static const home = '/home';
+
+  // Secciones (puedes ir creando las reales luego)
+  static const residentes = '/residentes';
+  static const areasComunes = '/areas-comunes';
+  static const finanzas = '/finanzas';
+  static const mantenimiento = '/mantenimiento';
+  static const comunicacion = '/comunicacion';
+  static const reportes = '/reportes';
+  static const seguridad = '/seguridad';
+  static const authSeg = '/autenticacion-seguridad';
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Api.I.init(); // auto local→prod + interceptor de token
+  runApp(const App());
+}
 
+class App extends StatelessWidget {
+  const App({super.key});
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'SmartCondominium',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF06B6D4)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
+      initialRoute: Routes.login,
+      routes: {
+        Routes.login: (_) => const LoginScreen(),
+        Routes.register: (_) => const RegisterScreen(),
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+        // HOME con tu menú (contenido atractivo del condominio)
+        Routes.home: (_) => const HomeScreen(),
 
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  String _pingMsg = 'Ping pendiente…';
-
-  void _incrementCounter() => setState(() => _counter++);
-
-  Future<void> _ping() async {
-    try {
-      final uri = Uri.parse('${Env.apiBase}/api/ping/');
-      final res = await http.get(uri);
-      if (res.statusCode == 200) {
-        final data = json.decode(res.body);
-        setState(() => _pingMsg = 'OK: ${data.toString()}');
-      } else {
-        setState(() => _pingMsg = 'Error HTTP ${res.statusCode}');
-      }
-    } catch (e) {
-      setState(() => _pingMsg = 'Error: $e');
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _ping();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(_pingMsg),
-            const SizedBox(height: 16),
-            const Text('You have pushed the button this many times:'),
-            Text('$_counter', style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: _ping,
-              icon: const Icon(Icons.wifi_tethering),
-              label: const Text('Reintentar ping'),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
+        // Placeholders (mientras no existan las screens reales)
+        Routes.residentes: (_) => const PlaceholderScreen(title: 'Residentes'),
+        Routes.areasComunes: (_) =>
+            const PlaceholderScreen(title: 'Áreas Comunes'),
+        Routes.finanzas: (_) => const PlaceholderScreen(title: 'Finanzas'),
+        Routes.mantenimiento: (_) =>
+            const PlaceholderScreen(title: 'Mantenimiento'),
+        Routes.comunicacion: (_) =>
+            const PlaceholderScreen(title: 'Comunicación'),
+        Routes.reportes: (_) => const PlaceholderScreen(title: 'Reportes'),
+        Routes.seguridad: (_) => const PlaceholderScreen(title: 'Seguridad'),
+        Routes.authSeg: (_) =>
+            const PlaceholderScreen(title: 'Autenticación y Seguridad'),
+      },
     );
   }
 }
