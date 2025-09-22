@@ -2,18 +2,18 @@ import 'package:dio/dio.dart';
 
 class Env {
   // Dev con celular físico + adb reverse:
-  static const String localBase = 'http://localhost:8001';
+  static const String localBase = 'http://127.0.0.1:8001/';
 
   // Producción:
   static const String prodBase = 'https://smartcondominiumbackend.onrender.com';
 
   /// Opción para forzar local durante pruebas (pon temporalmente true si quieres).
-  static const bool FORCE_LOCAL = false;
+  static const bool forceLocal = false;
 
   /// Elige baseUrl automáticamente SIN usar /api/ping/.
   /// Prueba contra /api/login/ (debe responder 405/400/200 <500).
   static Future<String> pickBaseUrl() async {
-    if (FORCE_LOCAL) return localBase;
+    if (forceLocal) return localBase;
     if (await _isReachable(localBase)) return localBase;
     return prodBase;
   }

@@ -4,6 +4,7 @@ import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholder_screen.dart';
+import 'screens/finanzas_screen.dart';
 
 class Routes {
   static const login = '/login';
@@ -52,7 +53,7 @@ class App extends StatelessWidget {
         Routes.residentes: (_) => const PlaceholderScreen(title: 'Residentes'),
         Routes.areasComunes: (_) =>
             const PlaceholderScreen(title: 'Áreas Comunes'),
-        Routes.finanzas: (_) => const PlaceholderScreen(title: 'Finanzas'),
+        Routes.finanzas: (_) => const FinanzasScreen(),
         Routes.mantenimiento: (_) =>
             const PlaceholderScreen(title: 'Mantenimiento'),
         Routes.comunicacion: (_) =>
