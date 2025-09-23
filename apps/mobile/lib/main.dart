@@ -5,6 +5,8 @@ import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/finanzas_screen.dart';
+import 'screens/comunicacion_screen.dart';
+import 'screens/mensajes_screen.dart';
 
 class Routes {
   static const login = '/login';
@@ -13,7 +15,7 @@ class Routes {
   // Tu “Home” con menú (dashboard de la app)
   static const home = '/home';
 
-  // Secciones (puedes ir creando las reales luego)
+  // Secciones
   static const residentes = '/residentes';
   static const areasComunes = '/areas-comunes';
   static const finanzas = '/finanzas';
@@ -22,6 +24,9 @@ class Routes {
   static const reportes = '/reportes';
   static const seguridad = '/seguridad';
   static const authSeg = '/autenticacion-seguridad';
+
+  // Subrutas de Comunicación
+  static const comunicacionMensajes = '/comunicacion/mensajes';
 }
 
 Future<void> main() async {
@@ -49,15 +54,18 @@ class App extends StatelessWidget {
         // HOME con tu menú (contenido atractivo del condominio)
         Routes.home: (_) => const HomeScreen(),
 
-        // Placeholders (mientras no existan las screens reales)
+        // Secciones reales/placeholder
         Routes.residentes: (_) => const PlaceholderScreen(title: 'Residentes'),
         Routes.areasComunes: (_) =>
             const PlaceholderScreen(title: 'Áreas Comunes'),
         Routes.finanzas: (_) => const FinanzasScreen(),
         Routes.mantenimiento: (_) =>
             const PlaceholderScreen(title: 'Mantenimiento'),
-        Routes.comunicacion: (_) =>
-            const PlaceholderScreen(title: 'Comunicación'),
+
+        // Comunicación (nuevo)
+        Routes.comunicacion: (_) => const ComunicacionScreen(),
+        Routes.comunicacionMensajes: (_) => const MensajesScreen(),
+
         Routes.reportes: (_) => const PlaceholderScreen(title: 'Reportes'),
         Routes.seguridad: (_) => const PlaceholderScreen(title: 'Seguridad'),
         Routes.authSeg: (_) =>
