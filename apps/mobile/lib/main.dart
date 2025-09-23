@@ -13,6 +13,7 @@ import 'screens/reserva_screen.dart';
 import 'screens/comunicacion_screen.dart';
 import 'screens/mensajes_screen.dart';
 import 'screens/historial_comunicados_screen.dart';
+import 'screens/mfa_screen.dart';
 
 class Routes {
   static const login = '/login';
@@ -85,8 +86,7 @@ class App extends StatelessWidget {
 
         Routes.reportes: (_) => const PlaceholderScreen(title: 'Reportes'),
         Routes.seguridad: (_) => const PlaceholderScreen(title: 'Seguridad'),
-        Routes.authSeg: (_) =>
-            const PlaceholderScreen(title: 'Autenticación y Seguridad'),
+        Routes.authSeg: (_) => const Seguridad2FAScreen(),
 
         Routes.comunicacionHistorial: (_) => HistorialComunicadosScreen(),
       },
