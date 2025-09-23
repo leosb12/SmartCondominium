@@ -1,6 +1,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, Layers, FileDown, ShieldAlert, RefreshCw } from "lucide-react";
+import {
+  BarChart3,
+  Layers,
+  FileDown,
+  FileText,       // ← nuevo ícono para Bitácora
+  ShieldAlert,
+  RefreshCw,
+} from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useAdminCheck } from "../hooks/useRoles";
 
@@ -97,6 +104,16 @@ const Reportes: React.FC = () => {
           desc="Exporta tus reportes en formatos PDF y Excel."
           onClick={() => navigate("exportar-reporte")}
         />
+
+        {/* Solo visible para administradores */}
+        {isAdmin && (
+          <Card
+            icon={<FileText className="h-7 w-7 text-blue-400" />}
+            title="Bitácora"
+            desc="Consulta el historial de auditoría: altas, actualizaciones y eliminaciones registradas en el sistema."
+            onClick={() => navigate("bitacora")}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
