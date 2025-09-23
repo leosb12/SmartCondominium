@@ -30,6 +30,7 @@ class ComunicacionScreen extends StatelessWidget {
       ),
     );
 
+    // Card: Mensajes
     Widget mensajesCard = _CardButton(
       leadingIcon: const Icon(
         Icons.mark_chat_unread_rounded,
@@ -39,10 +40,18 @@ class ComunicacionScreen extends StatelessWidget {
       title: 'Mensajes',
       desc: 'Envía, recibe y administra mensajes y avisos del condominio.',
       onTap: () => Navigator.of(context).pushNamed(Routes.comunicacionMensajes),
-      // Para aislar el problema de rutas, prueba esto:
-      // onTap: () => Navigator.of(context).push(
-      //   MaterialPageRoute(builder: (_) => const MensajesScreen()),
-      // ),
+    );
+
+    // Card: Historial de comunicados
+    Widget historialCard = _CardButton(
+      leadingIcon: const Icon(
+        Icons.campaign_outlined,
+        size: 28,
+        color: Color(0xFFF59E0B),
+      ),
+      title: 'Historial de comunicados',
+      desc: 'Consulta los comunicados y avisos publicados anteriormente.',
+      onTap: () => Navigator.of(context).pushNamed(Routes.comunicacionHistorial),
     );
 
     Widget grid = LayoutBuilder(
@@ -57,7 +66,10 @@ class ComunicacionScreen extends StatelessWidget {
           mainAxisSpacing: 16,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          children: [mensajesCard],
+          children: [
+            mensajesCard,
+            historialCard,
+          ],
         );
       },
     );
@@ -112,6 +124,7 @@ class ComunicacionScreen extends StatelessWidget {
   }
 }
 
+// IMPORTANTE: deja solo UNA definición de _CardButton en este archivo.
 class _CardButton extends StatefulWidget {
   final Widget leadingIcon;
   final String title;
@@ -124,8 +137,8 @@ class _CardButton extends StatefulWidget {
     required this.onTap,
   });
 
-    @override
-    State<_CardButton> createState() => _CardButtonState();
+  @override
+  State<_CardButton> createState() => _CardButtonState();
 }
 
 class _CardButtonState extends State<_CardButton> {
