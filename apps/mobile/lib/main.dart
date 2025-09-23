@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 import 'core/api.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/finanzas_screen.dart';
+import 'screens/reserva_screen.dart';
 
 class Routes {
   static const login = '/login';
   static const register = '/register';
-
-  // Tu “Home” con menú (dashboard de la app)
   static const home = '/home';
-
-  // Secciones (puedes ir creando las reales luego)
   static const residentes = '/residentes';
   static const areasComunes = '/areas-comunes';
   static const finanzas = '/finanzas';
@@ -26,12 +27,18 @@ class Routes {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Intl / Locales
+  Intl.defaultLocale = 'es'; // o 'es_BO' si prefieres
+  await initializeDateFormatting('es'); // carga datos de fechas
+
   await Api.I.init(); // auto local→prod + interceptor de token
   runApp(const App());
 }
 
 class App extends StatelessWidget {
   const App({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -41,18 +48,23 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF06B6D4)),
         useMaterial3: true,
       ),
+
+      // Localización (datepicker, formatos, textos de Material en ES)
+      locale: const Locale('es'),
+      supportedLocales: const [Locale('es'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
       initialRoute: Routes.login,
       routes: {
         Routes.login: (_) => const LoginScreen(),
         Routes.register: (_) => const RegisterScreen(),
-
-        // HOME con tu menú (contenido atractivo del condominio)
         Routes.home: (_) => const HomeScreen(),
-
-        // Placeholders (mientras no existan las screens reales)
         Routes.residentes: (_) => const PlaceholderScreen(title: 'Residentes'),
-        Routes.areasComunes: (_) =>
-            const PlaceholderScreen(title: 'Áreas Comunes'),
+        Routes.areasComunes: (_) => const ReservaScreen(),
         Routes.finanzas: (_) => const FinanzasScreen(),
         Routes.mantenimiento: (_) =>
             const PlaceholderScreen(title: 'Mantenimiento'),

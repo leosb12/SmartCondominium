@@ -420,33 +420,47 @@ class ReservaRepository:
     @staticmethod
     def get_user_propiedades(user_id):
         """
-        Get properties asociadas a un usuario:
-        - Devuelve propiedades donde el usuario aparece en usuario_habitante
-          con estado = 1. Incluye info básica de la propiedad.
+        Devuelve propiedades donde el usuario aparece en usuario_habitante
+        con estado=1 (activo). Soporta esquemas con estado_id o estado.
         """
         try:
             client = supabase_admin
 
+            # Principal: estado_id = 1
             result = (
                 client.table('usuario_habitante')
                 .select(
                     '''
-                    propiedad_id, estado,
+                    propiedad_id,
                     propiedad:propiedad_id (id, nro_casa)
                     '''
                 )
-                .eq('usuario_id', user_id)  # <--- UUID del usuario
-                .eq('estado', 1)
+                .eq('usuario_id', user_id)
+                .eq('estado_id', 1)
                 .execute()
             )
 
+            # Fallback: si algún deploy viejo tuviera 'estado'
+            if not result.data:
+                result = (
+                    client.table('usuario_habitante')
+                    .select(
+                        '''
+                        propiedad_id,
+                        propiedad:propiedad_id (id, nro_casa)
+                        '''
+                    )
+                    .eq('usuario_id', user_id)
+                    .eq('estado', 1)
+                    .execute()
+                )
+
             if result.data:
-                propiedades = []
+                props = []
                 for item in result.data:
                     if item.get('propiedad'):
-                        prop = dict(item['propiedad'])
-                        propiedades.append(prop)
-                return propiedades
+                        props.append(dict(item['propiedad']))
+                return props
 
             return []
         except Exception as e:
@@ -458,36 +472,36 @@ class ReservaRepository:
     def validate_user_can_reserve(user_id, propiedad_id):
         """
         Valida que el usuario puede reservar a nombre de la propiedad:
-        - Debe existir (usuario_id, propiedad_id, estado=1). Tolerante a estado='1'.
+        Debe existir (usuario_id, propiedad_id, estado_id=1).
+        Deja fallback a estado=1 por compatibilidad.
         """
         try:
-            client = supabase_admin
-
-            # Normalizar propiedad_id
             try:
                 pid = int(propiedad_id)
             except Exception:
                 return False, "propiedad_id inválido"
 
-            # Primero intenta con estado numérico 1
+            client = supabase_admin
+
+            # Principal: estado_id = 1
             result = (
                 client.table('usuario_habitante')
-                .select('usuario_id, propiedad_id, estado')
+                .select('usuario_id, propiedad_id')
                 .eq('usuario_id', user_id)
                 .eq('propiedad_id', pid)
-                .eq('estado', 1)
+                .eq('estado_id', 1)
                 .limit(1)
                 .execute()
             )
 
-            # Fallback si estado está almacenado como '1' texto
+            # Fallback: estado = 1
             if not result.data:
                 result = (
                     client.table('usuario_habitante')
-                    .select('usuario_id, propiedad_id, estado')
+                    .select('usuario_id, propiedad_id')
                     .eq('usuario_id', user_id)
                     .eq('propiedad_id', pid)
-                    .eq('estado', '1')
+                    .eq('estado', 1)
                     .limit(1)
                     .execute()
                 )
