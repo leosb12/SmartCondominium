@@ -31,7 +31,7 @@ import AgregarComunicado from "./pages/AgregarComunicado";
 import CostoMaterial from   "./pages/Costo_Material.tsx"
 import HistorialMantenimiento from  "./pages/HistorialMantenimiento"
 import ReporteConsolidado from "./pages/reporteConsolidado"
-import ExportarReporte from "./pages/ExportarReporte"
+import ExportarReporte from "./pages/exportarReporte"
 
 export default function App() {
   return (
