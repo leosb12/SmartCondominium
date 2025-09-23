@@ -208,26 +208,6 @@ const ExportarReporte: React.FC = () => {
     setError(null);
     setNote(null);
 
-    // Abrimos la ventana de impresión ANTES del trabajo async para que no la bloquee el navegador
-    const needPDF = formato === "pdf" || formato === "both";
-    let printWin: Window | null = null;
-    if (needPDF) {
-      printWin = window.open("", "_blank", "noopener,width=1200,height=800");
-      if (printWin) {
-        // Mantener la ventana viva con un placeholder
-        printWin.document.open();
-        printWin.document.write(`
-          <!doctype html>
-          <html><head><meta charset="utf-8"><title>Generando PDF…</title></head>
-          <body style="background:#050E22;color:#DCE8FF;font-family:Inter,system-ui,sans-serif;padding:24px;">
-            <h3 style="margin:0 0 8px 0;">Generando reporte…</h3>
-            <p>Por favor, espera unos segundos…</p>
-          </body></html>
-        `);
-        printWin.document.close();
-      }
-    }
-
     try {
       // Preparar promesas según selección
       let finanzaP: Promise<ReporteFinanciero | null> = Promise.resolve(null);
@@ -295,6 +275,8 @@ const ExportarReporte: React.FC = () => {
           incSeguridad,
         });
       }
+
+      const needPDF = formato === "pdf" || formato === "both";
       if (needPDF) {
         await exportToPDF(
           {
@@ -307,8 +289,7 @@ const ExportarReporte: React.FC = () => {
             incMantenimiento,
             incSeguridad,
           },
-          { pdfCompacto },
-          printWin // pasamos la ventana preabierta
+          { pdfCompacto }
         );
       }
 
@@ -532,7 +513,7 @@ const ExportarReporte: React.FC = () => {
 
       push("=== Finanzas - Deudores ===");
       push("propiedad_id,deuda,vencido_expensas");
-      for (const d of (ctx.finanzas.top_deudores || [])) {
+      for (const d of ctx.finanzas.top_deudores || []) {
         push(`${d.propiedad_id},${d.deuda},${d.vencido}`);
       }
       push("");
@@ -612,7 +593,7 @@ const ExportarReporte: React.FC = () => {
     a.remove();
   };
 
-  // PDF (usa ventana preabierta si existe; si no, usa iframe para evitar pop‑up)
+  // PDF sin ventana emergente (usa iframe oculto)
   const exportToPDF = async (
     ctx: {
       finanzas: ReporteFinanciero | null;
@@ -624,8 +605,7 @@ const ExportarReporte: React.FC = () => {
       incMantenimiento: boolean;
       incSeguridad: boolean;
     },
-    opts: { pdfCompacto: boolean },
-    preOpenedWin: Window | null
+    opts: { pdfCompacto: boolean }
   ) => {
     const maxRows = opts.pdfCompacto ? 100 : Number.POSITIVE_INFINITY;
 
@@ -794,30 +774,11 @@ const ExportarReporte: React.FC = () => {
         </head>
         <body style="margin:0;background:#050E22;">
           ${parts.join("")}
-          <div class="no-print" style="position:fixed; right:16px; bottom:16px;">
-            <button onclick="window.print()" style="background:#2A4DB3;border:none;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-weight:600;">
-              Imprimir / Guardar PDF
-            </button>
-          </div>
-          <script>window.focus(); setTimeout(() => window.print(), 350);</script>
         </body>
       </html>
     `;
 
-    // Preferimos usar la ventana preabierta (no bloqueada)
-    if (preOpenedWin) {
-      try {
-        preOpenedWin.document.open();
-        preOpenedWin.document.write(html);
-        preOpenedWin.document.close();
-        preOpenedWin.focus();
-        return;
-      } catch {
-        // si falla, caemos al iframe
-      }
-    }
-
-    // Fallback: iframe oculto (evita pop‑ups)
+    // Iframe oculto (sin ventanas emergentes)
     const iframe = document.createElement("iframe");
     iframe.style.position = "fixed";
     iframe.style.right = "0";
@@ -829,14 +790,14 @@ const ExportarReporte: React.FC = () => {
 
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
     if (!doc) {
-      setError("No se pudo preparar la impresión. Intenta permitir pop-ups o usa Excel.");
+      setError("No se pudo preparar la impresión. Intenta permitir el diálogo de impresión o usa Excel.");
       return;
     }
+
     doc.open();
     doc.write(html);
     doc.close();
 
-    // imprimimos y limpiamos
     const w = iframe.contentWindow;
     if (w) {
       w.focus();
@@ -1125,8 +1086,8 @@ const ExportarReporte: React.FC = () => {
         </div>
         <ul className="list-disc pl-5 text-slate-400 text-sm space-y-1">
           <li>Deja “Desde” y “Hasta” vacíos para exportar todo el histórico.</li>
-          <li>Para Excel avanzado, instala la dependencia “xlsx” si no está instalada.</li>
-          <li>Si tu navegador bloquea pop-ups, igualmente usaremos un visor interno (sin ventanas emergentes).</li>
+
+
         </ul>
       </div>
     </DashboardLayout>
