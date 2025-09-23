@@ -110,7 +110,7 @@ const Reportes: React.FC = () => {
           <Card
             icon={<FileText className="h-7 w-7 text-blue-400" />}
             title="Bitácora"
-            desc="Consulta el historial de auditoría: altas, actualizaciones y eliminaciones registradas en el sistema."
+            desc="Consulta el historial de auditoría: altas, actualizaciones, y eliminaciones registradas en el sistema."
             onClick={() => navigate("bitacora")}
           />
         )}
