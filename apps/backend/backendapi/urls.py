@@ -60,4 +60,5 @@ urlpatterns = [
     path("finanzas/", include("backendapi.EstadoCuenta.urls")),
     path("pagos/", include("backendapi.Pagos.urls")),
     path("reportes-consolidados/", include("backendapi.reportesConsolidados.urls")),
+    path("", include("backendapi.bitacora.urls")),
 ]
