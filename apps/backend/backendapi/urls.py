@@ -59,4 +59,5 @@ urlpatterns = [
     # backendapi/urls.py (además de lo que ya tienes)
     path("finanzas/", include("backendapi.EstadoCuenta.urls")),
     path("pagos/", include("backendapi.Pagos.urls")),
+    path("reportes-consolidados/", include("backendapi.reportesConsolidados.urls")),
 ]
