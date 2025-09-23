@@ -1,8 +1,8 @@
-// src/pages/Reportes.tsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { BarChart3, FileBarChart } from "lucide-react";
+import { BarChart3, Layers, FileDown, ShieldAlert, RefreshCw } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
+import { useAdminCheck } from "../hooks/useRoles";
 
 const Card: React.FC<{
   icon: React.ReactNode;
@@ -28,6 +28,46 @@ const Card: React.FC<{
 
 const Reportes: React.FC = () => {
   const navigate = useNavigate();
+  const { isAdmin, loading: adminLoading } = useAdminCheck();
+
+  // Cargando estado de rol
+  if (adminLoading) {
+    return (
+      <DashboardLayout
+        title="Reportes"
+        subtitle="Genera y consulta reportes financieros del condominio"
+        icon={<BarChart3 className="h-5 w-5 text-blue-400" />}
+      >
+        <div className="flex items-center gap-2 text-slate-300">
+          <RefreshCw className="h-4 w-4 animate-spin" />
+          Verificando permisos...
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Acceso denegado para no administradores
+  if (!isAdmin) {
+    return (
+      <DashboardLayout
+        title="Reportes"
+        subtitle="Genera y consulta reportes financieros del condominio"
+        icon={<BarChart3 className="h-5 w-5 text-blue-400" />}
+      >
+        <div className="mb-6 rounded-xl border border-amber-800/50 bg-amber-900/20 p-4 text-amber-200 flex items-center gap-2">
+          <ShieldAlert className="h-5 w-5" />
+          Acceso restringido. Solo los administradores pueden ver esta sección.
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="rounded-xl px-4 py-2 text-slate-300 border border-slate-700/60 hover:bg-slate-900/50"
+        >
+          Volver
+        </button>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout
@@ -42,13 +82,20 @@ const Reportes: React.FC = () => {
         </p>
       </div>
 
-      {/* Grid responsive (preparado para más cards a futuro) */}
+      {/* Grid de opciones */}
       <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
         <Card
-          icon={<FileBarChart className="h-7 w-7 text-blue-400" />}
-          title="Generar reporte financiero"
-          desc="Crea reportes de ingresos, egresos y morosidad con filtros por rango de fechas, propiedades y estados."
-          onClick={() => navigate("reporte-finanza")}
+          icon={<Layers className="h-7 w-7 text-blue-400" />}
+          title="Reportes consolidados"
+          desc="Visualiza todos los reportes del condominio: finanzas, seguridad, reservas y mantenimiento en un solo lugar."
+          onClick={() => navigate("reporteconsolidado")}
+        />
+
+        <Card
+          icon={<FileDown className="h-7 w-7 text-blue-400" />}
+          title="Exportar Reporte"
+          desc="Exporta tus reportes en formatos PDF y Excel."
+          onClick={() => navigate("exportar-reporte")}
         />
       </div>
     </DashboardLayout>
