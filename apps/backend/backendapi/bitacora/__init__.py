@@ -1,0 +1,1 @@
+# Dejar vacío o declarar AppConfig si lo prefieres vía default_app_config
