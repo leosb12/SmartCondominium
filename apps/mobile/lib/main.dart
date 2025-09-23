@@ -10,11 +10,16 @@ import 'screens/home_screen.dart';
 import 'screens/placeholder_screen.dart';
 import 'screens/finanzas_screen.dart';
 import 'screens/reserva_screen.dart';
+import 'screens/comunicacion_screen.dart';
+import 'screens/mensajes_screen.dart';
+import 'screens/historial_comunicados_screen.dart';
 
 class Routes {
   static const login = '/login';
   static const register = '/register';
   static const home = '/home';
+
+  // Secciones
   static const residentes = '/residentes';
   static const areasComunes = '/areas-comunes';
   static const finanzas = '/finanzas';
@@ -23,6 +28,9 @@ class Routes {
   static const reportes = '/reportes';
   static const seguridad = '/seguridad';
   static const authSeg = '/autenticacion-seguridad';
+  static const comunicacionHistorial = '/comunicacion/historial';
+  // Subrutas de Comunicación
+  static const comunicacionMensajes = '/comunicacion/mensajes';
 }
 
 Future<void> main() async {
@@ -63,17 +71,24 @@ class App extends StatelessWidget {
         Routes.login: (_) => const LoginScreen(),
         Routes.register: (_) => const RegisterScreen(),
         Routes.home: (_) => const HomeScreen(),
+
+        // Secciones reales/placeholder
         Routes.residentes: (_) => const PlaceholderScreen(title: 'Residentes'),
         Routes.areasComunes: (_) => const ReservaScreen(),
         Routes.finanzas: (_) => const FinanzasScreen(),
         Routes.mantenimiento: (_) =>
             const PlaceholderScreen(title: 'Mantenimiento'),
-        Routes.comunicacion: (_) =>
-            const PlaceholderScreen(title: 'Comunicación'),
+
+        // Comunicación (nuevo)
+        Routes.comunicacion: (_) => const ComunicacionScreen(),
+        Routes.comunicacionMensajes: (_) => const MensajesScreen(),
+
         Routes.reportes: (_) => const PlaceholderScreen(title: 'Reportes'),
         Routes.seguridad: (_) => const PlaceholderScreen(title: 'Seguridad'),
         Routes.authSeg: (_) =>
             const PlaceholderScreen(title: 'Autenticación y Seguridad'),
+
+        Routes.comunicacionHistorial: (_) => HistorialComunicadosScreen(),
       },
     );
   }
