@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'core/api.dart';
+import 'core/push_service.dart'; // 👈 NUEVO
+
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
@@ -38,10 +40,13 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Intl / Locales
-  Intl.defaultLocale = 'es'; // o 'es_BO' si prefieres
-  await initializeDateFormatting('es'); // carga datos de fechas
+  Intl.defaultLocale = 'es';
+  await initializeDateFormatting('es');
 
-  await Api.I.init(); // auto local→prod + interceptor de token
+  await Api.I.init(); // tu API (Dio) con baseUrl + bearer auto
+  await PushService.init(); // 👈 inicializa Firebase/FCM
+  await PushService.registerTokenIfLoggedIn(); // 👈 registra token si ya hay sesión
+
   runApp(const App());
 }
 
@@ -57,8 +62,6 @@ class App extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF06B6D4)),
         useMaterial3: true,
       ),
-
-      // Localización (datepicker, formatos, textos de Material en ES)
       locale: const Locale('es'),
       supportedLocales: const [Locale('es'), Locale('en')],
       localizationsDelegates: const [
@@ -66,28 +69,21 @@ class App extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-
       initialRoute: Routes.login,
       routes: {
         Routes.login: (_) => const LoginScreen(),
         Routes.register: (_) => const RegisterScreen(),
         Routes.home: (_) => const HomeScreen(),
-
-        // Secciones reales/placeholder
         Routes.residentes: (_) => const PlaceholderScreen(title: 'Residentes'),
         Routes.areasComunes: (_) => const ReservaScreen(),
         Routes.finanzas: (_) => const FinanzasScreen(),
         Routes.mantenimiento: (_) =>
             const PlaceholderScreen(title: 'Mantenimiento'),
-
-        // Comunicación (nuevo)
         Routes.comunicacion: (_) => const ComunicacionScreen(),
         Routes.comunicacionMensajes: (_) => const MensajesScreen(),
-
         Routes.reportes: (_) => const PlaceholderScreen(title: 'Reportes'),
         Routes.seguridad: (_) => const PlaceholderScreen(title: 'Seguridad'),
         Routes.authSeg: (_) => const Seguridad2FAScreen(),
-
         Routes.comunicacionHistorial: (_) => HistorialComunicadosScreen(),
       },
     );

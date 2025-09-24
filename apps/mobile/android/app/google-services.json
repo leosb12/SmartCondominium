@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "965989513474",
+    "project_id": "smartcondominium-df523",
+    "storage_bucket": "smartcondominium-df523.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:965989513474:android:c1588890407870be03aa1b",
+        "android_client_info": {
+          "package_name": "com.si2.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUlqyU-DM0wAadGdTGeBz2PpafGYHGu0s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
