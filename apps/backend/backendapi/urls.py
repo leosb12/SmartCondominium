@@ -61,4 +61,5 @@ urlpatterns = [
     path("pagos/", include("backendapi.Pagos.urls")),
     path("reportes-consolidados/", include("backendapi.reportesConsolidados.urls")),
     path("", include("backendapi.bitacora.urls")),
+    path("notificaciones/", include("backendapi.notificaciones.urls")),
 ]
