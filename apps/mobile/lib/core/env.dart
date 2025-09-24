@@ -8,7 +8,7 @@ class Env {
   static const String prodBase = 'https://smartcondominiumbackend.onrender.com';
 
   /// Opción para forzar local durante pruebas (pon temporalmente true si quieres).
-  static const bool forceLocal = true;
+  static const bool forceLocal = false;
 
   /// Elige baseUrl automáticamente SIN usar /api/ping/.
   /// Prueba contra /api/login/ (debe responder 405/400/200 <500).

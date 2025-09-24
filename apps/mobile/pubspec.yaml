@@ -38,6 +38,9 @@ dependencies:
   flutter_secure_storage: ^9.2.2
   url_launcher: ^6.3.0
   cupertino_icons: ^1.0.8
+  firebase_core: ^4.1.1
+  firebase_messaging: ^16.0.2
+  flutter_local_notifications:
 
 
 dev_dependencies:

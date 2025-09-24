@@ -3,6 +3,11 @@ import '../core/api.dart';
 import '../core/token_storage.dart';
 import '../main.dart';
 import 'mfa_dialog.dart';
+import '../core/push_service.dart';
+
+// 👇 añadidos para registrar token FCM después del login
+import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,6 +35,24 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // 👇 NUEVO: registra/actualiza el token FCM del dispositivo en tu backend
+  Future<void> _registerPushToken() async {
+    try {
+      final token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return;
+      final plataforma = Platform.isIOS ? 'ios' : 'android';
+
+      // Envía el token a tu backend (endpoint de ejemplo).
+      // Si aún no existe, esta llamada fallará en silencio (catched).
+      await Api.I.dio.post(
+        '/notificaciones/push-token',
+        data: {'token': token, 'plataforma': plataforma},
+      );
+    } catch (_) {
+      // No bloquea el login si falla el registro del token.
+    }
+  }
+
   Future<void> _doLogin() async {
     setState(() {
       _loading = true;
@@ -47,6 +70,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (success) {
         await Api.I.setTokensFromLoginResponse(res);
+        // 👇 NUEVO: registra el token push tras autenticar
+        await PushService.registerTokenIfLoggedIn();
+
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, Routes.home);
         return;
@@ -77,6 +103,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 final data2 = res2.data as Map<String, dynamic>;
                 if (data2['success'] == true) {
                   await Api.I.setTokensFromLoginResponse(res2);
+
+                  // 👇 NUEVO: registra el token push tras autenticar con MFA
+                  await PushService.registerTokenIfLoggedIn();
+
                   if (!mounted) return;
                   Navigator.of(context).pop(); // cierra modal
                   Navigator.pushReplacementNamed(context, Routes.home);

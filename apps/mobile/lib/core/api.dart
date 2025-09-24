@@ -152,4 +152,16 @@ class Api {
       queryParameters: {'tipo': tipo, 'id': '$id'},
     );
   }
+
+  // ---------- NOTIFICACIONES ----------
+  Future<Response> registerPushToken({
+    required String token,
+    required String plataforma, // "android" | "ios"
+  }) {
+    // baseUrl ya termina en /api
+    return dio.post(
+      '/notificaciones/register-push-token',
+      data: {'token': token, 'plataforma': plataforma},
+    );
+  }
 }
