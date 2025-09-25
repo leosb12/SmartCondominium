@@ -1,9 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../Layouts/DashboardLayout";
-
 import { IdentificationIcon } from "@heroicons/react/24/outline";
+import { identityApi } from "../services/identityAPI"; // Ajusta la ruta según tu estructura
+import { useRoles } from "../hooks/useRoles";
 
-const API_URL = "http://localhost:8011/visitors/enroll";
 const API_KEY = "clave-interna-identity"; // Cambia si tu API key es diferente
 
 const DOC_TYPES = [
@@ -11,6 +12,8 @@ const DOC_TYPES = [
   { value: "PASAPORTE", label: "Pasaporte" },
   { value: "OTRO", label: "Otro" },
 ];
+
+const ALLOWED_ROLE_IDS = new Set<number>([1, 2, 3]);
 
 const RegistrarVisitante: React.FC<{
   user?: UserProfile | null;
@@ -27,6 +30,19 @@ const RegistrarVisitante: React.FC<{
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const navigate = useNavigate();
+  const { roles } = useRoles();
+
+  // Solo dejar pasar a rol 1, 2 o 3 (admin, propietario, inquilino)
+  useEffect(() => {
+    // Si aún no hay roles cargados, no redirijas
+    if (!roles || roles.length === 0) return;
+    const isAllowed = roles.some((r: any) => ALLOWED_ROLE_IDS.has(r.id));
+    if (!isAllowed) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [roles, navigate]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -68,30 +84,29 @@ const RegistrarVisitante: React.FC<{
     formData.append("face_images", faceImage!);
 
     try {
-      const res = await fetch(API_URL, {
-        method: "POST",
+      const res = await identityApi.post("/visitors/enroll", formData, {
         headers: {
           "X-IDENTITY-KEY": API_KEY,
+          // No pongas 'Content-Type': axios la setea automáticamente con boundaries para multipart
         },
-        body: formData,
       });
 
-      const data = await res.json();
+      const data = res.data;
 
-      if (!res.ok) {
-        setError(data.detail || "Error al registrar visitante");
-        setResult(null);
+      setResult(
+        `¡Visitante registrado!\nID: ${data.visitor_id}\nRostros válidos: ${data.faces}\nEstado: ${data.status}`
+      );
+      setError(null);
+      setForm({ fullName: "", docType: "DNI", docNumber: "", phone: "" });
+      setFaceImage(null);
+      setPreviewUrl(null);
+    } catch (err: any) {
+      if (err.response && err.response.data && err.response.data.detail) {
+        setError(err.response.data.detail);
       } else {
-        setResult(
-          `¡Visitante registrado!\nID: ${data.visitor_id}\nRostros válidos: ${data.faces}\nEstado: ${data.status}`
-        );
-        setError(null);
-        setForm({ fullName: "", docType: "DNI", docNumber: "", phone: "" });
-        setFaceImage(null);
-        setPreviewUrl(null);
+        setError("Error de red o del servidor");
       }
-    } catch (err) {
-      setError("Error de red o del servidor");
+      setResult(null);
     } finally {
       setLoading(false);
     }

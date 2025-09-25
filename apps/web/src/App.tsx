@@ -35,6 +35,8 @@ import ExportarReporte from "./pages/exportarReporte"
 import Bitacora from "./pages/Bitacora"
 import RegistrarVisitante from "./pages/RegistrarVisitante";
 import DetectarVisitante from "./pages/DetectarVisitante";
+import Residente from "./pages/residentes"
+import Seguridad from "./pages/Seguridad";
 
 export default function App() {
   return (
@@ -78,6 +80,8 @@ export default function App() {
           <Route path="/reportes/bitacora" element={<Bitacora />} />
           <Route path="/registrarvisitante" element={<RegistrarVisitante />} />
           <Route path="/detectarvisitante" element={<DetectarVisitante />} />
+          <Route path="/residentes" element={<Residente />} />
+          <Route path="/seguridad" element={<Seguridad />} />
         </Route>
       </Routes>
     </BrowserRouter>
