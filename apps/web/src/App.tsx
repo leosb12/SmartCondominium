@@ -36,7 +36,7 @@ import Bitacora from "./pages/Bitacora"
 import RegistrarVisitante from "./pages/RegistrarVisitante";
 import DetectarVisitante from "./pages/DetectarVisitante";
 import Residente from "./pages/residentes"
-import Seguridad from "./pages/Seguridad";
+import Seguridad from "./pages/seguridad";
 
 export default function App() {
   return (
