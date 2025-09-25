@@ -33,6 +33,8 @@ import HistorialMantenimiento from  "./pages/HistorialMantenimiento"
 import ReporteConsolidado from "./pages/reporteConsolidado"
 import ExportarReporte from "./pages/exportarReporte"
 import Bitacora from "./pages/Bitacora"
+import RegistrarVisitante from "./pages/RegistrarVisitante";
+import DetectarVisitante from "./pages/DetectarVisitante";
 
 export default function App() {
   return (
@@ -74,6 +76,8 @@ export default function App() {
           <Route path="/reportes/reporteconsolidado" element={<ReporteConsolidado />} />
           <Route path="/reportes/exportar-reporte" element={<ExportarReporte />} />
           <Route path="/reportes/bitacora" element={<Bitacora />} />
+          <Route path="/registrarvisitante" element={<RegistrarVisitante />} />
+          <Route path="/detectarvisitante" element={<DetectarVisitante />} />
         </Route>
       </Routes>
     </BrowserRouter>
