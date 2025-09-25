@@ -1,6 +1,7 @@
 // lib/core/push_service.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -9,6 +10,7 @@ import '../firebase_options.dart';
 import 'api.dart';
 import 'token_storage.dart';
 
+/// Canal de notificaciones (DEBE coincidir con el usado en el backend)
 const _channelId = 'high_importance_channel';
 const _channelName = 'Notificaciones importantes';
 const _channelDesc = 'Canal para notificaciones de alta prioridad';
@@ -20,18 +22,18 @@ class PushService {
   static bool _inited = false;
   static bool _boundRefresh = false;
 
+  /// Inicializa Firebase, permisos y manejadores. Idempotente.
   static Future<void> init() async {
     if (_inited) return;
 
-    // Firebase
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
 
-    // Handler para mensajes cuando la app está en background/terminada
+    // Handler de mensajes en background/terminated (debe ser top-level).
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // Inicializar notificaciones locales + canal Android
+    // Inicializa notificaciones locales + canal Android
     const initAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
     const initIOS = DarwinInitializationSettings();
     const initSettings = InitializationSettings(
@@ -42,8 +44,7 @@ class PushService {
     await _local.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (resp) {
-        // Si quieres rutear al tocar una notificación local en foreground:
-        // print('payload: ${resp.payload}');
+        // Aquí podrías rutear con resp.payload si lo deseas.
       },
     );
 
@@ -63,7 +64,7 @@ class PushService {
         >()
         ?.createNotificationChannel(channel);
 
-    // iOS: permitir mostrar en foreground como banner/sonido
+    // iOS: permitir banner/sonido en foreground
     if (Platform.isIOS) {
       await FirebaseMessaging.instance
           .setForegroundNotificationPresentationOptions(
@@ -73,10 +74,10 @@ class PushService {
           );
     }
 
-    // Pedir permiso si hace falta (Android 13+ / iOS)
+    // Pedir permiso si hiciera falta (Android 13+ / iOS)
     await askNotificationPermissionIfNeeded();
 
-    // Mostrar notificación local cuando llega un FCM estando en foreground
+    // Mostrar una notificación local cuando llega un FCM en foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       final notif = message.notification;
       final title = notif?.title ?? message.data['title'] ?? 'Notificación';
@@ -113,6 +114,7 @@ class PushService {
     _inited = true;
   }
 
+  /// Pide permiso de notificaciones si todavía no lo tiene.
   static Future<void> askNotificationPermissionIfNeeded() async {
     final settings = await FirebaseMessaging.instance.getNotificationSettings();
     if (settings.authorizationStatus == AuthorizationStatus.notDetermined ||
@@ -130,22 +132,44 @@ class PushService {
     }
   }
 
+  /// Wrapper “a prueba de 401/errores”. Úsalo en arranque y no bloquea la UI.
+  static Future<void> registerTokenIfLoggedInSafe() async {
+    try {
+      await registerTokenIfLoggedIn();
+    } catch (e, _) {
+      debugPrint('⚠️  Registro de push ignorado: $e');
+    }
+  }
+
+  /// Registra el token en backend SOLO si hay sesión válida.
+  /// Lanza excepto en 401 (que se ignora).
   static Future<void> registerTokenIfLoggedIn() async {
     final access = await TokenStorage.I.accessToken;
-    if (access == null || access.isEmpty) return;
+    if (access == null || access.isEmpty) return; // sin sesión
 
     final token = await FirebaseMessaging.instance.getToken();
     if (token == null || token.isEmpty) return;
 
     final plataforma = Platform.isIOS ? 'ios' : 'android';
-    await Api.I.registerPushToken(token: token, plataforma: plataforma);
+    try {
+      await Api.I.registerPushToken(token: token, plataforma: plataforma);
+    } on DioException catch (e) {
+      if ((e.response?.statusCode ?? 0) == 401) {
+        debugPrint('🔒 401 al registrar push (sesión caducada). Se omite.');
+        return;
+      }
+      rethrow; // otros errores sí se propagan (para debug)
+    }
 
+    // Suscribirse a refresh del token
     if (!_boundRefresh) {
       _boundRefresh = true;
       FirebaseMessaging.instance.onTokenRefresh.listen((t) async {
         try {
           await Api.I.registerPushToken(token: t, plataforma: plataforma);
-        } catch (_) {}
+        } catch (_) {
+          /* no bloquear por errores de red */
+        }
       });
     }
   }
@@ -153,7 +177,7 @@ class PushService {
   static void _handleMessageTap(RemoteMessage message) {
     // Lee message.data y navega si quieres:
     // final route = message.data['route'];
-    // if (route == 'reserva') { navigatorKey.currentState?.pushNamed('/areas-comunes'); }
+    // if (route == 'reserva') navigatorKey.currentState?.pushNamed('/areas-comunes');
   }
 }
 
@@ -161,5 +185,6 @@ class PushService {
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  // Si el backend enviara SOLO "data", aquí podrías mostrar una local también.
+  // Si tu backend enviara SOLO "data", aquí podrías disparar una local,
+  // pero recuerda que el plugin puede no estar inicializado en el isolate de bg.
 }

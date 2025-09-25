@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'core/api.dart';
-import 'core/push_service.dart'; // 👈 NUEVO
+import 'core/push_service.dart';
 
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
@@ -43,11 +43,15 @@ Future<void> main() async {
   Intl.defaultLocale = 'es';
   await initializeDateFormatting('es');
 
-  await Api.I.init(); // tu API (Dio) con baseUrl + bearer auto
-  await PushService.init(); // 👈 inicializa Firebase/FCM
-  await PushService.registerTokenIfLoggedIn(); // 👈 registra token si ya hay sesión
+  await Api.I.init(); // Config de tu API (Dio)
+  await PushService.init(); // Firebase/FCM + permisos + handlers
 
   runApp(const App());
+
+  // No bloquear el arranque (ni crashear por 401).
+  // Intencionalmente SIN await: corre en background.
+  // ignore: unawaited_futures
+  PushService.registerTokenIfLoggedInSafe();
 }
 
 class App extends StatelessWidget {
