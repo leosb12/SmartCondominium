@@ -126,10 +126,28 @@ const DetectarVisitante: React.FC = () => {
             .select("*")
             .eq("id", data.visitor_id)
             .single();
-
+          const [firstName, ...rest] = visitorData.full_name.split(" ");
+            const lastName = rest.join(" ");
           if (visitorData) {
             setVisitor(visitorData);
             setResult(null);
+            await supabase.from("bitacora").insert([
+                  {
+                    event_type: "INGRESO_VISITANTE_VERIFICADO",
+                    table_name: "visitors",
+                    row_id: visitorData.id,
+                    user_id: null,
+                    first_name: firstName,
+                    last_name: lastName,
+                    title: "Ingreso de visitante verificado",
+                    details: {
+                      doc_type: visitorData.doc_type,
+                      doc_number: visitorData.doc_number,
+                      status: visitorData.status,
+                      fecha: new Date().toISOString(),
+                    },
+                  }
+                ]);
           } else if (supabaseError) {
             setError(`No se pudo obtener los datos: ${supabaseError.message}`);
           } else {
