@@ -36,7 +36,6 @@ const RegistrarVisitante: React.FC<{
 
   // Solo dejar pasar a rol 1, 2 o 3 (admin, propietario, inquilino)
   useEffect(() => {
-    // Si aún no hay roles cargados, no redirijas
     if (!roles || roles.length === 0) return;
     const isAllowed = roles.some((r: any) => ALLOWED_ROLE_IDS.has(r.id));
     if (!isAllowed) {
@@ -83,11 +82,15 @@ const RegistrarVisitante: React.FC<{
     formData.append("phone", form.phone);
     formData.append("face_images", faceImage!);
 
+    // Agrega console.log para depuración
+    console.log("VITE_IDENTITY_API_BASE:", import.meta.env.VITE_IDENTITY_API_BASE);
+    console.log("Endpoint a usar:", `${import.meta.env.VITE_IDENTITY_API_BASE}/visitors/enroll`);
+    console.log("FormData:", formData);
+
     try {
       const res = await identityApi.post("/visitors/enroll", formData, {
         headers: {
           "X-IDENTITY-KEY": API_KEY,
-          // No pongas 'Content-Type': axios la setea automáticamente con boundaries para multipart
         },
       });
 
@@ -101,6 +104,7 @@ const RegistrarVisitante: React.FC<{
       setFaceImage(null);
       setPreviewUrl(null);
     } catch (err: any) {
+      console.error("Error en el registro:", err);
       if (err.response && err.response.data && err.response.data.detail) {
         setError(err.response.data.detail);
       } else {
