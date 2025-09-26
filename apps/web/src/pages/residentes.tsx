@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { UserPlus } from "lucide-react";
+import { UserPlus, CarFront } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useRoles } from "../hooks/useRoles";
 
@@ -51,6 +51,12 @@ const Residente: React.FC = () => {
             title="Registrar visita"
             desc="Registra visitantes autorizados para tu departamento o casa."
             onClick={() => navigate("/registrarvisitante")}
+          />
+          <Card
+            icon={<CarFront className="h-7 w-7 text-blue-400" />}
+            title="Registrar placa"
+            desc="Registra la placa de tu vehículo para habilitar el acceso automático por escáner."
+            onClick={() => navigate("/registrarplaca")}
           />
         </div>
       )}

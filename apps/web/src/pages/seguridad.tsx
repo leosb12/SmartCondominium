@@ -1,10 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, CarFront, AlertTriangle } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useRoles } from "../hooks/useRoles";
 
-const Card: React.FC<{icon: React.ReactNode; title: string; desc: string; onClick: () => void;}> = ({ icon, title, desc, onClick }) => (
+const Card: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  onClick: () => void;
+}> = ({ icon, title, desc, onClick }) => (
   <button
     onClick={onClick}
     className="group flex flex-col items-start rounded-2xl border border-slate-800/70 bg-gradient-to-br from-slate-900 to-slate-950 p-8 shadow-xl hover:from-blue-950 hover:to-slate-900 hover:border-blue-600/60 transition-all duration-300 text-left"
@@ -35,7 +40,9 @@ const Seguridad: React.FC = () => {
       icon={<ShieldCheck className="h-5 w-5 text-blue-400" />}
     >
       <div className="mb-8 rounded-2xl border border-slate-800/60 bg-gradient-to-r from-blue-950/60 via-slate-900 to-slate-950 p-8">
-        <p className="text-slate-300">Gestión de visitas y control de identidad para el personal autorizado.</p>
+        <p className="text-slate-300">
+          Gestión de visitas y control de identidad para el personal autorizado.
+        </p>
       </div>
 
       {!canAccess ? (
@@ -52,6 +59,18 @@ const Seguridad: React.FC = () => {
             title="Detectar Visita"
             desc="Accede a la detección facial y verificación de visitantes en tiempo real."
             onClick={() => navigate("/detectarvisitante")}
+          />
+          <Card
+            icon={<CarFront className="h-7 w-7 text-blue-400" />}
+            title="Detectar Placa"
+            desc="Permite el ingreso automático de vehículos autorizados al condominio mediante reconocimiento de placa."
+            onClick={() => navigate("/detectarplaca")}
+          />
+          <Card
+            icon={<AlertTriangle className="h-7 w-7 text-yellow-400" />}
+            title="Anomalías"
+            desc="Consulta y gestiona registros de accesos irregulares (personas o autos desconocidos) detectados por el sistema de seguridad."
+            onClick={() => navigate("/anomalias")}
           />
         </div>
       )}

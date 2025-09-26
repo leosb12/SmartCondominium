@@ -4,7 +4,7 @@ import DashboardLayout from "../Layouts/DashboardLayout";
 import { ShieldCheckIcon } from "@heroicons/react/24/outline";
 import { plateApi } from "../services/plateApi";
 import { useRoles } from "../hooks/useRoles";
-import { supabase } from "../services/supabaseClient"; // Asumiendo que tu cliente está en esta ruta
+import { supabase } from "../services/supabaseClient";
 
 const ALLOWED_ROLE_IDS = new Set<number>([1, 4]);
 
@@ -27,7 +27,6 @@ const DetectarPlaca: React.FC = () => {
   const [imgFile, setImgFile] = useState<File | null>(null);
   const [imgPreview, setImgPreview] = useState<string | null>(null);
 
-  // Pop-up para registro_acceso_auto
   const [openRegistro, setOpenRegistro] = useState(false);
   const [evento, setEvento] = useState<string>("ENTRADA");
   const [resultado, setResultado] = useState<string>("AUTORIZADO");
@@ -38,7 +37,6 @@ const DetectarPlaca: React.FC = () => {
   const navigate = useNavigate();
   const { roles } = useRoles();
 
-  // Permisos de rol
   useEffect(() => {
     if (!roles || roles.length === 0) return;
     const isAllowed = roles.some((r: any) => ALLOWED_ROLE_IDS.has(r.id));
@@ -132,13 +130,50 @@ const DetectarPlaca: React.FC = () => {
         },
       });
       setResult(res.data);
-      // Si está autorizada, abre el pop up de registro
+
       if (res.data.authorized) {
         setOpenRegistro(true);
         setEvento("ENTRADA");
         setResultado("AUTORIZADO");
         setDetalles("");
         setRegistroOk(false);
+      } else {
+        // ----- ANOMALIA: Insertar registro en anomalia si auto no es reconocido -----
+        try {
+          let foto_url = null;
+          // Subir la imagen al bucket "anomalias" en Supabase Storage
+          const fileName = `autos/${Date.now()}_auto_desconocido.jpg`;
+          const { data: storageRes, error: storageErr } = await supabase.storage
+            .from("anomalias")
+            .upload(fileName, imgBlob, { cacheControl: "3600", upsert: false });
+          if (!storageErr && storageRes && storageRes.path) {
+            // Obtener url pública
+            const { data: publicUrl } = supabase
+              .storage
+              .from("anomalias")
+              .getPublicUrl(storageRes.path);
+            foto_url = publicUrl?.publicUrl || null;
+          }
+          // Insertar en tabla anomalia
+          await supabase.from("anomalia").insert([
+            {
+              tipo_anomalia: "auto",
+              descripcion: "Intento de ingreso de auto no reconocido",
+              detalle: {
+                foto_url,
+                placa_detectada: res.data.plate,
+                fecha: new Date().toISOString(),
+                observacion: "Intento de acceso con placa no reconocida"
+              },
+              fecha: new Date().toISOString(),
+              ubicacion: null,
+              procesado: false
+            }
+          ]);
+        } catch (anomaliaError) {
+          // No mostramos error al usuario, solo para log interno
+          // console.error("Error registrando anomalia auto:", anomaliaError);
+        }
       }
     } catch (err: any) {
       if (err.response && err.response.data) {
@@ -170,7 +205,6 @@ const DetectarPlaca: React.FC = () => {
     await sendImageToApi(imgFile);
   };
 
-  // Registro en tabla registro_acceso_auto
   const handleRegistroAcceso = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!result?.plate) return;

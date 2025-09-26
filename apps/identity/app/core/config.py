@@ -15,7 +15,7 @@ class Settings:
 
     # Orígenes permitidos (para CORS) -> lista separada por comas
     ALLOW_ORIGINS: list[str] = [
-        o.strip() for o in os.getenv("ALLOW_ORIGINS", "http://localhost:3000").split(",") if o.strip()
+        o.strip() for o in os.getenv("ALLOW_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",") if o.strip()
     ]
 
     # Parámetros de validación de rostro
