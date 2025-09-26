@@ -5,7 +5,9 @@ from .services import fetch_visitor_data
 from .serializers import VisitorSerializer
 import requests
 
-IDENTITY_API_BASE = "http://localhost:8011"  # Cambia si tu microservicio IA está en otro lugar
+import os
+
+IDENTITY_API_BASE = os.environ.get("IDENTITY_API_BASE", "http://localhost:8011")
 
 class VisitorDataView(APIView):
     def get(self, request, visitor_id):
