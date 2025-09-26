@@ -6,7 +6,7 @@ import { identityApi } from "../services/identityAPI";
 import { useRoles } from "../hooks/useRoles";
 
 const ALLOWED_ROLE_IDS = new Set<number>([1, 4]);
-const API_KEY = "clave-interna-identity"; // Cambia si tu API key es diferente
+const API_KEY = import.meta.env.VITE_IDENTITY_API_KEY || "clave-interna-identity";
 
 type VisitorData = {
   id: string;
@@ -110,12 +110,8 @@ const DetectarVisitante: React.FC = () => {
       const formData = new FormData();
       formData.append("face_image", blob, "captura.jpg");
 
-      // --- DEBUG: Console logs para depuración ---
-      console.log("VITE_IDENTITY_API_BASE:", import.meta.env.VITE_IDENTITY_API_BASE);
-      console.log("Endpoint para match:", `${import.meta.env.VITE_IDENTITY_API_BASE}/visitors/match`);
-      console.log("FormData enviado (face_image):", blob);
-
       try {
+        // POST para detectar visitante
         const res = await identityApi.post("/visitors/match", formData, {
           headers: {
             "X-IDENTITY-KEY": API_KEY,
@@ -124,22 +120,19 @@ const DetectarVisitante: React.FC = () => {
 
         const data = res.data;
 
-        // --- DEBUG: Respuesta de /visitors/match ---
-        console.log("Respuesta /visitors/match:", data);
-
         if (data.match && data.visitor_id) {
-          // Obtener detalles del visitante por su ID
+          // GET para obtener detalles del visitante
           const visitorRes = await identityApi.get(`/visitors/${data.visitor_id}`, {
             headers: {
               "X-IDENTITY-KEY": API_KEY,
             },
           });
-          // --- DEBUG: Respuesta de /visitors/{visitor_id} ---
-          console.log("Respuesta /visitors/{id}:", visitorRes.data);
 
-          if (visitorRes.status === 200) {
+          if (visitorRes.status === 200 && visitorRes.data && visitorRes.data.full_name) {
             setVisitor(visitorRes.data);
             setResult(null);
+          } else if (visitorRes.data?.detail) {
+            setError(`No se pudo obtener los datos: ${visitorRes.data.detail}`);
           } else {
             setError("Visitante detectado, pero no se pudo obtener sus datos.");
           }
@@ -148,7 +141,6 @@ const DetectarVisitante: React.FC = () => {
           setResult("No se encontró coincidencia.");
         }
       } catch (err: any) {
-        console.error("Error en el proceso de match:", err);
         if (err.response && err.response.data) {
           if (Array.isArray(err.response.data)) {
             setError(err.response.data.map((e: any) => e.msg).join(" | "));
@@ -256,7 +248,6 @@ const DetectarVisitante: React.FC = () => {
                 ? (() => {
                     const dt = new Date(visitor.created_at);
                     if (isNaN(dt.getTime())) {
-                      console.log("Valor inválido para created_at:", visitor.created_at);
                       return "—";
                     }
                     return dt.toLocaleString();
