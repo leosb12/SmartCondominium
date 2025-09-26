@@ -37,6 +37,8 @@ import RegistrarVisitante from "./pages/RegistrarVisitante";
 import DetectarVisitante from "./pages/DetectarVisitante";
 import Residente from "./pages/residentes"
 import Seguridad from "./pages/seguridad";
+import DetectarPlaca from "./pages/DetectarPlaca"
+import RegistrarPlaca from "./pages/RegistrarPlaca"
 
 export default function App() {
   return (
@@ -82,6 +84,8 @@ export default function App() {
           <Route path="/detectarvisitante" element={<DetectarVisitante />} />
           <Route path="/residentes" element={<Residente />} />
           <Route path="/seguridad" element={<Seguridad />} />
+          <Route path="/detectarplaca" element={<DetectarPlaca />} />
+          <Route path="/registrarplaca" element={<RegistrarPlaca />} />
         </Route>
       </Routes>
     </BrowserRouter>
