@@ -6,7 +6,6 @@ import { identityApi } from "../services/identityAPI";
 import { useRoles } from "../hooks/useRoles";
 
 const ALLOWED_ROLE_IDS = new Set<number>([1, 4]);
-const API_KEY = import.meta.env.VITE_IDENTITY_API_KEY || "clave-interna-identity";
 
 type VisitorData = {
   id: string;
@@ -16,7 +15,7 @@ type VisitorData = {
   phone?: string | null;
   status: string;
   created_at: string;
-  images?: string[];
+  images?: string[]; // Si tu backend no retorna images, puedes quitar esta línea y su uso abajo.
 };
 
 const DetectarVisitante: React.FC = () => {
@@ -111,22 +110,17 @@ const DetectarVisitante: React.FC = () => {
       formData.append("face_image", blob, "captura.jpg");
 
       try {
-        // POST para detectar visitante
-        const res = await identityApi.post("/visitors/match", formData, {
-          headers: {
-            "X-IDENTITY-KEY": API_KEY,
-          },
-        });
+        // POST para detectar visitante (ajusta la URL si tu backend la expone diferente)
+        const res = await identityApi.post("detector-visitante/visitors/match", formData);
 
         const data = res.data;
 
         if (data.match && data.visitor_id) {
-          // GET para obtener detalles del visitante
-          const visitorRes = await identityApi.get(`/visitors/${data.visitor_id}`, {
-            headers: {
-              "X-IDENTITY-KEY": API_KEY,
-            },
-          });
+          // GET para obtener detalles del visitante desde tu propio backend
+          // Ajusta la baseURL de identityApi en services/identityAPI.ts para apuntar a tu backend (por ejemplo: http://localhost:8001/api)
+          const visitorRes = await identityApi.get(
+            `/detector-visitante/visitor-data/${data.visitor_id}/`
+          );
 
           if (visitorRes.status === 200 && visitorRes.data && visitorRes.data.full_name) {
             setVisitor(visitorRes.data);
@@ -211,17 +205,20 @@ const DetectarVisitante: React.FC = () => {
         {visitor && (
           <div className="bg-green-700/80 text-white p-4 rounded-xl mt-6 shadow text-center">
             <div className="text-lg font-bold mb-2">Visitante verificado</div>
-            <div className="mb-3 flex flex-wrap gap-2 justify-center">
-              {visitor.images?.map((imgUrl, idx) => (
-                <img
-                  key={idx}
-                  src={imgUrl}
-                  alt={`Foto visitante ${idx + 1}`}
-                  className="rounded-lg border border-blue-900 max-h-32"
-                  loading="lazy"
-                />
-              ))}
-            </div>
+            {/* Si tu backend no retorna images, puedes eliminar este bloque */}
+            {visitor.images && visitor.images.length > 0 && (
+              <div className="mb-3 flex flex-wrap gap-2 justify-center">
+                {visitor.images.map((imgUrl, idx) => (
+                  <img
+                    key={idx}
+                    src={imgUrl}
+                    alt={`Foto visitante ${idx + 1}`}
+                    className="rounded-lg border border-blue-900 max-h-32"
+                    loading="lazy"
+                  />
+                ))}
+              </div>
+            )}
             <div className="mb-1">
               <span className="font-semibold text-blue-200">Nombre completo: </span>
               {visitor.full_name}
