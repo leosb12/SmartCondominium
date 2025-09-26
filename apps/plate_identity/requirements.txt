@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+easyocr
+pillow
+supabase
+python-dotenv
