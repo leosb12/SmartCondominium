@@ -127,27 +127,27 @@ const DetectarVisitante: React.FC = () => {
             .eq("id", data.visitor_id)
             .single();
           const [firstName, ...rest] = visitorData.full_name.split(" ");
-            const lastName = rest.join(" ");
+          const lastName = rest.join(" ");
           if (visitorData) {
             setVisitor(visitorData);
             setResult(null);
             await supabase.from("bitacora").insert([
-                  {
-                    event_type: "INGRESO_VISITANTE_VERIFICADO",
-                    table_name: "visitors",
-                    row_id: visitorData.id,
-                    user_id: null,
-                    first_name: firstName,
-                    last_name: lastName,
-                    title: "Ingreso de visitante verificado",
-                    details: {
-                      doc_type: visitorData.doc_type,
-                      doc_number: visitorData.doc_number,
-                      status: visitorData.status,
-                      fecha: new Date().toISOString(),
-                    },
-                  }
-                ]);
+              {
+                event_type: "INGRESO_VISITANTE_VERIFICADO",
+                table_name: "visitors",
+                row_id: visitorData.id,
+                user_id: null,
+                first_name: firstName,
+                last_name: lastName,
+                title: "Ingreso de visitante verificado",
+                details: {
+                  doc_type: visitorData.doc_type,
+                  doc_number: visitorData.doc_number,
+                  status: visitorData.status,
+                  fecha: new Date().toISOString(),
+                },
+              }
+            ]);
           } else if (supabaseError) {
             setError(`No se pudo obtener los datos: ${supabaseError.message}`);
           } else {
@@ -156,6 +156,42 @@ const DetectarVisitante: React.FC = () => {
         } else {
           setVisitor(null);
           setResult("No se encontró coincidencia.");
+
+          // -- ANOMALIA: Insertar registro en anomalia si visitante no se reconoce --
+          try {
+            let foto_url = null;
+            // Subir la imagen al bucket "anomalias" en Supabase Storage
+            const fileName = `personas/${Date.now()}_persona_desconocida.jpg`;
+            const { data: storageRes, error: storageErr } = await supabase.storage
+              .from("anomalias")
+              .upload(fileName, blob, { cacheControl: "3600", upsert: false });
+            if (!storageErr && storageRes && storageRes.path) {
+              // Obtener url pública
+              const { data: publicUrl } = supabase
+                .storage
+                .from("anomalias")
+                .getPublicUrl(storageRes.path);
+              foto_url = publicUrl?.publicUrl || null;
+            }
+            // Insertar en tabla anomalia
+            await supabase.from("anomalia").insert([
+              {
+                tipo_anomalia: "persona",
+                descripcion: "Intento de ingreso de persona desconocida",
+                detalle: {
+                  foto_url,
+                  fecha: new Date().toISOString(),
+                  observacion: "Intento de acceso sin coincidencia facial"
+                },
+                fecha: new Date().toISOString(),
+                ubicacion: null,
+                procesado: false
+              }
+            ]);
+          } catch (anomaliaError) {
+            // (No mostramos error al usuario, solo para log interno)
+            // console.error("Error registrando anomalia visitante:", anomaliaError);
+          }
         }
       } catch (err: any) {
         if (err.response && err.response.data) {
