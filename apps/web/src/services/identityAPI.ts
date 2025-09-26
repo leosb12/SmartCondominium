@@ -1,11 +1,11 @@
 import axios from "axios";
 
-// Cambia el BASE_URL para que apunte a tu backend Django, por ejemplo:
-const BACKEND_API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8001/api";
+// BASE_URL del microservicio de IA (NO el backend de Django)
+const IDENTITY_API_BASE = import.meta.env.VITE_IDENTITY_API_BASE || "https://daryl-draftable-overdogmatically.ngrok-free.dev/";
 
 export const identityApi = axios.create({
-  baseURL: BACKEND_API_BASE,
+  baseURL: IDENTITY_API_BASE,
 });
 
-// Si necesitas headers personalizados para endpoints protegidos, usa esta función (puedes quitar el API_KEY si tu backend ya no lo requiere)
+// No necesitas headers personalizados para endpoints públicos del microservicio IA
 export const getIdentityHeaders = () => ({});
