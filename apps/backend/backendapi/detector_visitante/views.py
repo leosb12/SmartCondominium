@@ -5,9 +5,8 @@ from .services import fetch_visitor_data
 from .serializers import VisitorSerializer
 import requests
 
-import os
-
-IDENTITY_API_BASE = os.environ.get("IDENTITY_API_BASE", "http://localhost:8011")
+# Usa siempre la URL de ngrok, tanto en local como en producción
+IDENTITY_API_BASE = "https://daryl-draftable-overdogmatically.ngrok-free.dev"
 
 class VisitorDataView(APIView):
     def get(self, request, visitor_id):
