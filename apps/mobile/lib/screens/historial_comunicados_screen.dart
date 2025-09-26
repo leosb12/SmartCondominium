@@ -748,125 +748,114 @@ class _ComunicadoCard extends StatelessWidget {
         : false;
     final authorName = comunicado.author?.fullName ?? 'Autor desconocido';
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF0A0F1A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isExpired ? const Color(0xFFF59E0B).withOpacity(0.5) : const Color(0xFF1F2937),
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          // Portada
-          if (comunicado.portadaUrl != null && comunicado.portadaUrl!.isNotEmpty)
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 16 / 9,
-                  child: Image.network(
-                    comunicado.portadaUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: const Color(0xFF111827),
-                      child: const Center(
-                        child: Icon(Icons.image_not_supported_outlined, color: Color(0xFF64748B)),
-                      ),
-                    ),
-                  ),
-                ),
-                if (isExpired)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF59E0B),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: const Text('Expirado',
-                          style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                    ),
-                  ),
-              ],
-            )
-          else
-            AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Container(
-                color: const Color(0xFF111827),
-                child: const Center(
-                  child: Icon(Icons.image_outlined, color: Color(0xFF64748B)),
-                ),
-              ),
-            ),
-
-          // Contenido
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    comunicado.titulo,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFFE2E8F0),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    truncate(comunicado.contenido, 100),
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Color(0xFF94A3B8)),
-                  ),
-                  const SizedBox(height: 8),
-                  // Metadatos
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _metaRow(icon: Icons.schedule, text: 'Publicado: ${formatDate(comunicado.publishedAt)}'),
-                      const SizedBox(height: 4),
-                      _metaRow(icon: Icons.person_outline, text: 'Por: $authorName'),
-                      if (comunicado.expiresAt != null && comunicado.expiresAt!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        _metaRow(
-                          icon: Icons.calendar_today_outlined,
-                          text:
-                              '${isExpired ? "Expiró" : "Expira"}: ${formatDate(comunicado.expiresAt!)}',
-                          color: isExpired ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8),
-                        ),
-                      ],
-                    ],
-                  ),
-                  const Spacer(),
-                  // Botón "Ver completo" (abre modal)
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: onView,
-                      icon: const Icon(Icons.remove_red_eye_outlined, size: 16),
-                      label: const Text('Ver completo'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    return InkWell(
+      onTap: onView,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0A0F1A),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isExpired ? const Color(0xFFF59E0B).withOpacity(0.5) : const Color(0xFF1F2937),
           ),
-        ],
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            // Portada
+            if (comunicado.portadaUrl != null && comunicado.portadaUrl!.isNotEmpty)
+              Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Image.network(
+                      comunicado.portadaUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: const Color(0xFF111827),
+                        child: const Center(
+                          child: Icon(Icons.image_not_supported_outlined, color: Color(0xFF64748B)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  if (isExpired)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF59E0B),
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: const Text('Expirado',
+                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                      ),
+                    ),
+                ],
+              )
+            else
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Container(
+                  color: const Color(0xFF111827),
+                  child: const Center(
+                    child: Icon(Icons.image_outlined, color: Color(0xFF64748B)),
+                  ),
+                ),
+              ),
+
+            // Contenido
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      comunicado.titulo,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Color(0xFFE2E8F0),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      truncate(comunicado.contenido, 100),
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Color(0xFF94A3B8)),
+                    ),
+                    const SizedBox(height: 8),
+                    // Metadatos
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _metaRow(icon: Icons.schedule, text: 'Publicado: ${formatDate(comunicado.publishedAt)}'),
+                        const SizedBox(height: 4),
+                        _metaRow(icon: Icons.person_outline, text: 'Por: $authorName'),
+                        if (comunicado.expiresAt != null && comunicado.expiresAt!.isNotEmpty) ...[
+                          const SizedBox(height: 4),
+                          _metaRow(
+                            icon: Icons.calendar_today_outlined,
+                            text:
+                                '${isExpired ? "Expiró" : "Expira"}: ${formatDate(comunicado.expiresAt!)}',
+                            color: isExpired ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8),
+                          ),
+                        ],
+                      ],
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
