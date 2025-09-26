@@ -34,7 +34,6 @@ const DetectarVisitante: React.FC = () => {
 
   // Solo dejar pasar a rol 1 o 4 (admin, personal de seguridad)
   useEffect(() => {
-    // Si aún no hay roles cargados, no redirijas
     if (!roles || roles.length === 0) return;
     const isAllowed = roles.some((r: any) => ALLOWED_ROLE_IDS.has(r.id));
     if (!isAllowed) {
@@ -77,8 +76,7 @@ const DetectarVisitante: React.FC = () => {
     if (!cameraPrompt && !stream) {
       setCameraPrompt(true);
     }
-    // eslint-disable-next-line
-  }, [stream]);
+  }, [stream, cameraPrompt]);
 
   const handleCapture = async () => {
     setResult(null);
@@ -112,6 +110,11 @@ const DetectarVisitante: React.FC = () => {
       const formData = new FormData();
       formData.append("face_image", blob, "captura.jpg");
 
+      // --- DEBUG: Console logs para depuración ---
+      console.log("VITE_IDENTITY_API_BASE:", import.meta.env.VITE_IDENTITY_API_BASE);
+      console.log("Endpoint para match:", `${import.meta.env.VITE_IDENTITY_API_BASE}/visitors/match`);
+      console.log("FormData enviado (face_image):", blob);
+
       try {
         const res = await identityApi.post("/visitors/match", formData, {
           headers: {
@@ -121,6 +124,9 @@ const DetectarVisitante: React.FC = () => {
 
         const data = res.data;
 
+        // --- DEBUG: Respuesta de /visitors/match ---
+        console.log("Respuesta /visitors/match:", data);
+
         if (data.match && data.visitor_id) {
           // Obtener detalles del visitante por su ID
           const visitorRes = await identityApi.get(`/visitors/${data.visitor_id}`, {
@@ -128,6 +134,9 @@ const DetectarVisitante: React.FC = () => {
               "X-IDENTITY-KEY": API_KEY,
             },
           });
+          // --- DEBUG: Respuesta de /visitors/{visitor_id} ---
+          console.log("Respuesta /visitors/{id}:", visitorRes.data);
+
           if (visitorRes.status === 200) {
             setVisitor(visitorRes.data);
             setResult(null);
@@ -139,6 +148,7 @@ const DetectarVisitante: React.FC = () => {
           setResult("No se encontró coincidencia.");
         }
       } catch (err: any) {
+        console.error("Error en el proceso de match:", err);
         if (err.response && err.response.data) {
           if (Array.isArray(err.response.data)) {
             setError(err.response.data.map((e: any) => e.msg).join(" | "));
@@ -147,8 +157,8 @@ const DetectarVisitante: React.FC = () => {
               typeof err.response.data.detail === "string"
                 ? err.response.data.detail
                 : Array.isArray(err.response.data.detail)
-                  ? err.response.data.detail.map((e: any) => e.msg).join(" | ")
-                  : JSON.stringify(err.response.data.detail)
+                ? err.response.data.detail.map((e: any) => e.msg).join(" | ")
+                : JSON.stringify(err.response.data.detail)
             );
           } else {
             setError(JSON.stringify(err.response.data));
@@ -242,7 +252,16 @@ const DetectarVisitante: React.FC = () => {
             </div>
             <div className="mb-1">
               <span className="font-semibold text-blue-200">Fecha/Hora de registro: </span>
-              {new Date(visitor.created_at).toLocaleString()}
+              {visitor.created_at
+                ? (() => {
+                    const dt = new Date(visitor.created_at);
+                    if (isNaN(dt.getTime())) {
+                      console.log("Valor inválido para created_at:", visitor.created_at);
+                      return "—";
+                    }
+                    return dt.toLocaleString();
+                  })()
+                : "—"}
             </div>
           </div>
         )}
