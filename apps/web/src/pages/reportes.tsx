@@ -7,6 +7,7 @@ import {
   FileText,       // ← nuevo ícono para Bitácora
   ShieldAlert,
   RefreshCw,
+  TrendingUp,     // ← import para la nueva card "Predictivo"
 } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useAdminCheck } from "../hooks/useRoles";
@@ -107,12 +108,20 @@ const Reportes: React.FC = () => {
 
         {/* Solo visible para administradores */}
         {isAdmin && (
-          <Card
-            icon={<FileText className="h-7 w-7 text-blue-400" />}
-            title="Bitácora"
-            desc="Consulta el historial de auditoría: altas, actualizaciones y eliminaciones registradas en el sistema."
-            onClick={() => navigate("bitacora")}
-          />
+          <>
+            <Card
+              icon={<FileText className="h-7 w-7 text-blue-400" />}
+              title="Bitácora"
+              desc="Consulta el historial de auditoría: altas, actualizaciones y eliminaciones registradas en el sistema."
+              onClick={() => navigate("bitacora")}
+            />
+            <Card
+              icon={<TrendingUp className="h-7 w-7 text-blue-400" />}
+              title="Predictivo"
+              desc="Explora la demanda esperada por áreas, distribución de riesgo y horas calientes de seguridad."
+              onClick={() => navigate("predictivo")}
+            />
+          </>
         )}
       </div>
     </DashboardLayout>
