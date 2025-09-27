@@ -64,4 +64,6 @@ urlpatterns = [
     path("notificaciones/", include("backendapi.notificaciones.urls")),
     path('autos/', include('backendapi.registrarAuto.urls')),
     path("anomalias/", include("backendapi.anomalias.urls")),
+
+    path("analytics/", include("backendapi.analytics.urls")),
 ]

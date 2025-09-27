@@ -40,6 +40,7 @@ import Seguridad from "./pages/seguridad";
 import DetectarPlaca from "./pages/DetectarPlaca"
 import RegistrarPlaca from "./pages/RegistrarPlaca"
 import Anomalias from "./pages/Anomalias"
+import Predictivo from "./pages/Predictivo";
 
 export default function App() {
   return (
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="/detectarplaca" element={<DetectarPlaca />} />
           <Route path="/registrarplaca" element={<RegistrarPlaca />} />
           <Route path="/anomalias" element={<Anomalias />} />
+          <Route path="/reportes/predictivo" element={<Predictivo />} />
         </Route>
       </Routes>
     </BrowserRouter>
