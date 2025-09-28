@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/api.dart';
 import 'finanzas_models.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../widgets/menu_dashboard.dart';
 
 class FinanzasScreen extends StatefulWidget {
   const FinanzasScreen({super.key});
@@ -96,6 +97,7 @@ class _FinanzasScreenState extends State<FinanzasScreen> {
         backgroundColor: const Color(0xFF111827),
         iconTheme: const IconThemeData(color: Color(0xFF60A5FA)),
       ),
+      drawer: const MenuDashboard(), // <-- Aquí añades el menú
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -182,6 +184,7 @@ class _FinanzasScreenState extends State<FinanzasScreen> {
     );
   }
 }
+
 
 class _ResumenCard extends StatelessWidget {
   const _ResumenCard(this.r);
