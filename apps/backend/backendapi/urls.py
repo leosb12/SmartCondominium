@@ -66,4 +66,6 @@ urlpatterns = [
     path("anomalias/", include("backendapi.anomalias.urls")),
 
     path("analytics/", include("backendapi.analytics.urls")),
+
+    path("seguridad/pases-temporales/", include("backendapi.pases_temporales.urls")),
 ]

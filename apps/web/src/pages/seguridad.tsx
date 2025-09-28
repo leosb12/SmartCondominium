@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck, CarFront, AlertTriangle } from "lucide-react";
+import { ShieldCheck, CarFront, AlertTriangle, QrCode } from "lucide-react";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useRoles } from "../hooks/useRoles";
 
@@ -18,7 +18,9 @@ const Card: React.FC<{
       <div className="grid h-14 w-14 place-items-center rounded-xl bg-blue-600/20 ring-1 ring-inset ring-blue-500/30 group-hover:scale-110 transition-transform">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold text-slate-100 group-hover:text-blue-400">{title}</h3>
+      <h3 className="text-xl font-semibold text-slate-100 group-hover:text-blue-400">
+        {title}
+      </h3>
     </div>
     <p className="mt-3 text-slate-400 text-sm">{desc}</p>
   </button>
@@ -31,7 +33,7 @@ const Seguridad: React.FC = () => {
   const { roles } = useRoles();
 
   // Solo admin (1) y personal de seguridad (4)
-  const canAccess = roles.some((r: any) => ALLOWED_ROLE_IDS.has(r.id));
+  const canAccess = Array.isArray(roles) && roles.some((r: any) => ALLOWED_ROLE_IDS.has(r.id));
 
   return (
     <DashboardLayout
@@ -54,6 +56,14 @@ const Seguridad: React.FC = () => {
         </div>
       ) : (
         <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
+          {/* Nueva Card: Pase Temporal */}
+          <Card
+            icon={<QrCode className="h-7 w-7 text-blue-400" />}
+            title="Pase Temporal"
+            desc="Genera y valida pases temporales (QR/código) para visitantes."
+            onClick={() => navigate("/pases-temporales")}
+          />
+
           <Card
             icon={<ShieldCheck className="h-7 w-7 text-blue-400" />}
             title="Detectar Visita"

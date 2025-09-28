@@ -1,4 +1,4 @@
-#!C:\Users\Usuario\Desktop\SmartCondominium\apps\backend\venv\Scripts\python.exe
+#!C:\Users\hp\Desktop\ProyectosClonados\SmartCondominium\apps\backend\venv\Scripts\python.exe
 # -*- coding: utf-8 -*-
 # Copyright 2025 Google LLC
 #
