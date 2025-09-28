@@ -96,12 +96,6 @@ class _MenuDashboardState extends State<MenuDashboard> {
         color: const Color(0xFF60a5fa),
       ),
       (
-        route: Routes.residentes,
-        label: 'Residentes',
-        icon: Icons.groups_outlined,
-        color: const Color(0xFF10b981),
-      ),
-      (
         route: Routes.areasComunes,
         label: 'Áreas Comunes',
         icon: Icons.apartment_outlined,
@@ -114,28 +108,10 @@ class _MenuDashboardState extends State<MenuDashboard> {
         color: const Color(0xFF059669),
       ),
       (
-        route: Routes.mantenimiento,
-        label: 'Mantenimiento',
-        icon: Icons.build_outlined,
-        color: const Color(0xFFd97706),
-      ),
-      (
         route: Routes.comunicacion,
         label: 'Comunicación',
         icon: Icons.forum_outlined,
         color: const Color(0xFF2563eb),
-      ),
-      (
-        route: Routes.reportes,
-        label: 'Reportes',
-        icon: Icons.bar_chart_outlined,
-        color: const Color(0xFF7c3aed),
-      ),
-      (
-        route: Routes.seguridad,
-        label: 'Seguridad',
-        icon: Icons.shield_outlined,
-        color: const Color(0xFFdc2626),
       ),
       (
         route: Routes.authSeg,

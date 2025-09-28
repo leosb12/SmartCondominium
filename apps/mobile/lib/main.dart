@@ -17,6 +17,8 @@ import 'screens/mensajes_screen.dart';
 import 'screens/historial_comunicados_screen.dart';
 import 'screens/mfa_screen.dart';
 
+import 'package:dio/dio.dart'; // 👈 Necesario para manejar las excepciones de Dio
+
 class Routes {
   static const login = '/login';
   static const register = '/register';
@@ -45,7 +47,17 @@ Future<void> main() async {
 
   await Api.I.init(); // tu API (Dio) con baseUrl + bearer auto
   await PushService.init(); // 👈 inicializa Firebase/FCM
-  await PushService.registerTokenIfLoggedIn(); // 👈 registra token si ya hay sesión
+
+  // Manejo seguro del registro del token de push
+  try {
+    await PushService.registerTokenIfLoggedIn(); // 👈 registra token si ya hay sesión
+  } on DioException catch (e) {
+    if (e.response?.statusCode == 401) {
+      // Token inválido o no logueado; puedes ignorar o manejar aquí si necesitas
+    } else {
+      rethrow; // Otros errores, lánzalos para debug
+    }
+  }
 
   runApp(const App());
 }
