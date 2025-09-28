@@ -41,6 +41,7 @@ import DetectarPlaca from "./pages/DetectarPlaca"
 import RegistrarPlaca from "./pages/RegistrarPlaca"
 import Anomalias from "./pages/Anomalias"
 import Predictivo from "./pages/Predictivo";
+import PasesTemporales from "./pages/PasesTemporales";
 
 export default function App() {
   return (
@@ -90,6 +91,7 @@ export default function App() {
           <Route path="/registrarplaca" element={<RegistrarPlaca />} />
           <Route path="/anomalias" element={<Anomalias />} />
           <Route path="/reportes/predictivo" element={<Predictivo />} />
+          <Route path="/pases-temporales" element={<PasesTemporales />} />
         </Route>
       </Routes>
     </BrowserRouter>
