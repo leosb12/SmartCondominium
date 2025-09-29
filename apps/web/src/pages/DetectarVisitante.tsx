@@ -173,8 +173,9 @@ const DetectarVisitante: React.FC = () => {
                 .getPublicUrl(storageRes.path);
               foto_url = publicUrl?.publicUrl || null;
             }
-            // Insertar en tabla anomalia
-            await supabase.from("anomalia").insert([
+
+            // Insertar en tabla anomalia y mostrar cualquier error
+            const { error: anomaliaInsertError } = await supabase.from("anomalia").insert([
               {
                 tipo_anomalia: "persona",
                 descripcion: "Intento de ingreso de persona desconocida",
@@ -188,9 +189,15 @@ const DetectarVisitante: React.FC = () => {
                 procesado: false
               }
             ]);
+            if (anomaliaInsertError) {
+              setError("Error al guardar anomalia: " + anomaliaInsertError.message);
+              console.error("Error al insertar en anomalia:", anomaliaInsertError);
+            } else {
+              console.log("Registro de anomalia guardado correctamente");
+            }
           } catch (anomaliaError) {
-            // (No mostramos error al usuario, solo para log interno)
-            // console.error("Error registrando anomalia visitante:", anomaliaError);
+            setError("Error inesperado guardando anomalia: " + (anomaliaError.message || String(anomaliaError)));
+            console.error("Excepción registrando anomalia visitante:", anomaliaError);
           }
         }
       } catch (err: any) {
