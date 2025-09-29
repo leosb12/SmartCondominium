@@ -49,7 +49,7 @@ const Finance: React.FC = () => {
           <Card
             icon={<Settings className="h-7 w-7 text-blue-400" />}
             title="Cuotas ordinarias y extraordinarias"
-            desc="Administra tarifas por m², extraordinarias y generación de expensas."
+            desc="Administra tarifas por m², extraordinarias y generación de expensas"
             onClick={() => navigate("/finanzas/administrar-cuotas")}
           />
         )}
