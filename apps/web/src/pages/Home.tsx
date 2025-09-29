@@ -40,9 +40,9 @@ export default function Home(){
               </a>
               <a
                 className="w-full sm:w-auto border border-gray-600 hover:border-blue-500 text-white px-6 sm:px-8 py-3 rounded-xl font-semibold transition hover:bg-blue-500/10 text-base sm:text-lg text-center"
-                href="/docs"
+                href="/register"
               >
-                Manual de uso
+                Registrarse
               </a>
             </div>
 
