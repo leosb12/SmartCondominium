@@ -197,17 +197,6 @@ export default function Home(){
               </p>
             </div>
 
-            <div className="group bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-5 sm:p-6 hover:border-blue-500/50 transition">
-              <div className="text-2xl sm:text-3xl mb-3">⚠️</div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
-                Alertas inteligentes
-              </h3>
-              <p className="text-gray-300 text-sm sm:text-base">
-                Comportamientos sospechosos: perros sueltos/necesidades,
-                vehículos mal estacionados, etc.
-              </p>
-            </div>
-
             <div className="group bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-5 sm:p-6 hover:border-blue-500/50 transition md:col-span-2 lg:col-span-1">
               <div className="text-2xl sm:text-3xl mb-3">📸</div>
               <h3 className="text-lg sm:text-xl font-bold mb-2 group-hover:text-blue-500 transition-colors">
