@@ -2,7 +2,7 @@ import axios from "axios";
 
 // En Vite, las variables de entorno deben empezar con VITE_ y se acceden vía import.meta.env
 const PLATE_API_BASE_URL =
-  import.meta.env.VITE_PLATE_API_URL || "https://tribute-shuttle-eve-mozilla.trycloudflare.com";
+  import.meta.env.VITE_PLATE_API_URL || "https://post-wishing-rating-produce.trycloudflare.com";
 
 export const plateApi = axios.create({
   baseURL: PLATE_API_BASE_URL,
