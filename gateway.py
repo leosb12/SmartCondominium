@@ -23,7 +23,7 @@ async def identity_proxy(path: str, request: Request):
 
 @app.api_route("/plate-identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH"])
 async def plate_identity_proxy(path: str, request: Request):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:  # 👈 ACÁ
         resp = await client.request(
             method=request.method,
             url=f"{PLATE_IDENTITY_URL}/{path}",
@@ -35,3 +35,4 @@ async def plate_identity_proxy(path: str, request: Request):
         status_code=resp.status_code,
         headers=resp.headers
     )
+
