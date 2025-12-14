@@ -1,14 +1,24 @@
 from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
 app = FastAPI()
 
+# 🔥 CORS (OBLIGATORIO)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],   # después podés restringir
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 IDENTITY_URL = "http://localhost:8011"
 PLATE_IDENTITY_URL = "http://localhost:8012"
 
-@app.api_route("/identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH"])
+@app.api_route("/identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS"])
 async def identity_proxy(path: str, request: Request):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.request(
             method=request.method,
             url=f"{IDENTITY_URL}/{path}",
@@ -18,12 +28,12 @@ async def identity_proxy(path: str, request: Request):
     return Response(
         content=resp.content,
         status_code=resp.status_code,
-        headers=resp.headers
+        headers=dict(resp.headers),
     )
 
-@app.api_route("/plate-identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH"])
+@app.api_route("/plate-identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS"])
 async def plate_identity_proxy(path: str, request: Request):
-    async with httpx.AsyncClient(timeout=60.0) as client:  # 👈 ACÁ
+    async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.request(
             method=request.method,
             url=f"{PLATE_IDENTITY_URL}/{path}",
@@ -33,6 +43,5 @@ async def plate_identity_proxy(path: str, request: Request):
     return Response(
         content=resp.content,
         status_code=resp.status_code,
-        headers=resp.headers
+        headers=dict(resp.headers),
     )
-
