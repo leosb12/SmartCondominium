@@ -197,7 +197,7 @@ def process_pending(request):
                 if not email:
                     raise RuntimeError("Usuario sin email")
                 status = send_email(email, f"[SmartCondo] {title}", html)
-                ok_flag = (status == 202)
+                ok_flag = (status == 200)  # Resend devuelve 200
             elif canal == "push":
                 tokens = get_user_tokens(usuario_id)
                 if not tokens:

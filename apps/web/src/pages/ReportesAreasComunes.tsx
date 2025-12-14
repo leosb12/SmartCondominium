@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../Layouts/DashboardLayout";
 import { useAdminCheck } from "../hooks/useRoles";
+import { api } from "../services/api";
 import {
   ResponsiveContainer,
   PieChart,
@@ -56,36 +57,6 @@ interface ChartDataMes {
   [key: string]: string | number;
 }
 
-/* ===================== Config mínima ===================== */
-// API base: .env VITE_API_URL o 127.0.0.1:8001/api por defecto
-const API_BASE =
-  ((import.meta as any)?.env?.VITE_API_URL as string | undefined)?.replace(/\/+$/, "") ||
-  "http://127.0.0.1:8001/api";
-
-function buildUrl(path: string) {
-  const u = `${API_BASE}/${path.replace(/^\/+/, "")}`;
-  return u.endsWith("/") ? u : `${u}/`;
-}
-
-async function fetchJSON<T>(path: string): Promise<T> {
-  const u = buildUrl(path);
-  const res = await fetch(u);
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`HTTP ${res.status} ${u} ${text}`);
-    }
-  const text = await res.text();
-  return (text ? (JSON.parse(text) as unknown) : ([] as unknown)) as T;
-}
-
-function todayYYYYMMDD(): string {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = `${d.getMonth() + 1}`.padStart(2, "0");
-  const day = `${d.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
 /* ===================== Componente ===================== */
 const ReportesAreasComunes: React.FC = () => {
   const navigate = useNavigate();
@@ -108,17 +79,17 @@ const ReportesAreasComunes: React.FC = () => {
     }
   }, [isAdmin, adminLoading, navigate]);
 
-  // Cargar datos SIN headers ni tokens
+  // Cargar datos usando api de services/api.ts
   useEffect(() => {
     const load = async () => {
       if (!isAdmin) return;
       try {
-        const [areasData, reservasData] = await Promise.all([
-          fetchJSON<AreaSocial[]>("areas-sociales/"),
-          fetchJSON<Reserva[]>("reservas-areas/"),
+        const [areasRes, reservasRes] = await Promise.all([
+          api.get<AreaSocial[]>("areas-sociales/"),
+          api.get<Reserva[]>("reservas-areas/"),
         ]);
-        setAreas(Array.isArray(areasData) ? areasData : []);
-        setReservas(Array.isArray(reservasData) ? reservasData : []);
+        setAreas(Array.isArray(areasRes.data) ? areasRes.data : []);
+        setReservas(Array.isArray(reservasRes.data) ? reservasRes.data : []);
       } catch (_e: unknown) {
         // Si ocurre error, dejamos vacíos sin mostrar anotaciones ni errores en pantalla
         setAreas([]);
@@ -127,6 +98,14 @@ const ReportesAreasComunes: React.FC = () => {
     };
     load();
   }, [isAdmin]);
+
+  function todayYYYYMMDD(): string {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = `${d.getMonth() + 1}`.padStart(2, "0");
+    const day = `${d.getDate()}`.padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
 
   // Filtrado en cliente
   const filteredReservas = useMemo(() => {

@@ -74,10 +74,12 @@ class HistorialComunicadosScreen extends StatefulWidget {
   const HistorialComunicadosScreen({super.key});
 
   @override
-  State<HistorialComunicadosScreen> createState() => _HistorialComunicadosScreenState();
+  State<HistorialComunicadosScreen> createState() =>
+      _HistorialComunicadosScreenState();
 }
 
-class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen> {
+class _HistorialComunicadosScreenState
+    extends State<HistorialComunicadosScreen> {
   // Datos
   List<Comunicado> _comunicados = [];
 
@@ -128,16 +130,18 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
     });
 
     try {
-      final qp = <String, dynamic>{
-        'page': '$page',
-        'page_size': '$_pageSize',
-      };
+      final qp = <String, dynamic>{'page': '$page', 'page_size': '$_pageSize'};
       if (_searchTerm.trim().isNotEmpty) qp['search'] = _searchTerm.trim();
       if (_authorName.trim().isNotEmpty) qp['author_name'] = _authorName.trim();
-      if (_publishedFrom != null) qp['published_from'] = _toIsoMinute(_publishedFrom!);
-      if (_publishedTo != null) qp['published_to'] = _toIsoMinute(_publishedTo!);
+      if (_publishedFrom != null)
+        qp['published_from'] = _toIsoMinute(_publishedFrom!);
+      if (_publishedTo != null)
+        qp['published_to'] = _toIsoMinute(_publishedTo!);
 
-      final res = await Api.I.dio.get('/historial-comunicados/', queryParameters: qp);
+      final res = await Api.I.dio.get(
+        '/historial-comunicados/',
+        queryParameters: qp,
+      );
       final data = res.data;
 
       List results = const [];
@@ -146,8 +150,12 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
       String? previous;
 
       if (data is Map<String, dynamic>) {
-        results = (data['results'] is List) ? (data['results'] as List) : <dynamic>[];
-        count = (data['count'] is int) ? data['count'] as int : int.tryParse('${data['count']}') ?? results.length;
+        results = (data['results'] is List)
+            ? (data['results'] as List)
+            : <dynamic>[];
+        count = (data['count'] is int)
+            ? data['count'] as int
+            : int.tryParse('${data['count']}') ?? results.length;
         next = data['next']?.toString();
         previous = data['previous']?.toString();
       } else if (data is List) {
@@ -163,7 +171,9 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
         _comunicados = comunicados;
         _hasNext = (next != null && next.isNotEmpty);
         _hasPrevious = (previous != null && previous.isNotEmpty);
-        _totalPages = (_pageSize > 0) ? ((count + _pageSize - 1) ~/ _pageSize) : 1;
+        _totalPages = (_pageSize > 0)
+            ? ((count + _pageSize - 1) ~/ _pageSize)
+            : 1;
         _currentPage = page;
       });
     } catch (e) {
@@ -197,7 +207,8 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
     }
   }
 
-  String _truncate(String s, [int max = 150]) => s.length <= max ? s : '${s.substring(0, max)}...';
+  String _truncate(String s, [int max = 150]) =>
+      s.length <= max ? s : '${s.substring(0, max)}...';
 
   Future<void> _pickDateTime({required bool from}) async {
     final now = DateTime.now();
@@ -238,7 +249,13 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
     );
     if (time == null) return;
 
-    final dt = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+    final dt = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
     setState(() {
       if (from) {
         _publishedFrom = dt;
@@ -262,7 +279,8 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
 
   void _viewComunicado(Comunicado c) {
     final isExpired = c.expiresAt != null && c.expiresAt!.isNotEmpty
-        ? DateTime.tryParse(c.expiresAt!)?.isBefore(DateTime.now().toUtc()) ?? false
+        ? DateTime.tryParse(c.expiresAt!)?.isBefore(DateTime.now().toUtc()) ??
+              false
         : false;
 
     showDialog(
@@ -271,15 +289,22 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
       builder: (ctx) {
         return Dialog(
           backgroundColor: const Color(0xFF0A0F1A),
-          insetPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 24),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 24,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               // Portada
               if (c.portadaUrl != null && c.portadaUrl!.isNotEmpty)
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Stack(
                     children: [
                       AspectRatio(
@@ -290,7 +315,10 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                           errorBuilder: (_, __, ___) => Container(
                             color: const Color(0xFF111827),
                             child: const Center(
-                              child: Icon(Icons.image_not_supported_outlined, color: Color(0xFF64748B)),
+                              child: Icon(
+                                Icons.image_not_supported_outlined,
+                                color: Color(0xFF64748B),
+                              ),
                             ),
                           ),
                         ),
@@ -300,13 +328,22 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                           top: 8,
                           right: 8,
                           child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFF59E0B),
                               borderRadius: BorderRadius.circular(999),
                             ),
-                            child: const Text('Expirado',
-                                style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                            child: const Text(
+                              'Expirado',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ),
                         ),
                     ],
@@ -337,32 +374,57 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.schedule, size: 16, color: Color(0xFF94A3B8)),
+                              const Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: Color(0xFF94A3B8),
+                              ),
                               const SizedBox(width: 6),
-                              Text('Publicado: ${_formatDate(c.publishedAt)}',
-                                  style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                              Text(
+                                'Publicado: ${_formatDate(c.publishedAt)}',
+                                style: const TextStyle(
+                                  color: Color(0xFF94A3B8),
+                                  fontSize: 12,
+                                ),
+                              ),
                             ],
                           ),
-                          if (c.author?.fullName != null && c.author!.fullName.isNotEmpty)
+                          if (c.author?.fullName != null &&
+                              c.author!.fullName.isNotEmpty)
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.person_outline, size: 16, color: Color(0xFF94A3B8)),
+                                const Icon(
+                                  Icons.person_outline,
+                                  size: 16,
+                                  color: Color(0xFF94A3B8),
+                                ),
                                 const SizedBox(width: 6),
-                                Text('Por: ${c.author!.fullName}',
-                                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
+                                Text(
+                                  'Por: ${c.author!.fullName}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 12,
+                                  ),
+                                ),
                               ],
                             ),
                           if (c.expiresAt != null && c.expiresAt!.isNotEmpty)
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.calendar_today_outlined, size: 16, color: Color(0xFF94A3B8)),
+                                const Icon(
+                                  Icons.calendar_today_outlined,
+                                  size: 16,
+                                  color: Color(0xFF94A3B8),
+                                ),
                                 const SizedBox(width: 6),
                                 Text(
                                   '${isExpired ? "Expiró" : "Expira"}: ${_formatDate(c.expiresAt!)}',
                                   style: TextStyle(
-                                    color: isExpired ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8),
+                                    color: isExpired
+                                        ? const Color(0xFFF59E0B)
+                                        : const Color(0xFF94A3B8),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -374,7 +436,10 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                       // Contenido completo
                       Text(
                         c.contenido,
-                        style: const TextStyle(color: Color(0xFFCBD5E1), height: 1.35),
+                        style: const TextStyle(
+                          color: Color(0xFFCBD5E1),
+                          height: 1.35,
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -393,7 +458,9 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                           side: const BorderSide(color: Color(0xFF334155)),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                         child: const Text('Cerrar'),
                       ),
@@ -439,12 +506,17 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                     // Búsqueda
                     Row(
                       children: [
-                        const Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+                        const Icon(
+                          Icons.search,
+                          color: Color(0xFF94A3B8),
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Expanded(
                           child: TextField(
                             decoration: const InputDecoration(
-                              hintText: 'Buscar comunicados por título o contenido...',
+                              hintText:
+                                  'Buscar comunicados por título o contenido...',
                               hintStyle: TextStyle(color: Color(0xFF94A3B8)),
                               border: InputBorder.none,
                             ),
@@ -462,7 +534,9 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                       children: [
                         _FilterChipBox(
                           label: 'Desde',
-                          value: _publishedFrom == null ? '—' : _toIsoMinute(_publishedFrom!),
+                          value: _publishedFrom == null
+                              ? '—'
+                              : _toIsoMinute(_publishedFrom!),
                           icon: Icons.calendar_today_outlined,
                           onTap: () => _pickDateTime(from: true),
                           onClear: _publishedFrom == null
@@ -474,7 +548,9 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                         ),
                         _FilterChipBox(
                           label: 'Hasta',
-                          value: _publishedTo == null ? '—' : _toIsoMinute(_publishedTo!),
+                          value: _publishedTo == null
+                              ? '—'
+                              : _toIsoMinute(_publishedTo!),
                           icon: Icons.calendar_today_outlined,
                           onTap: () => _pickDateTime(from: false),
                           onClear: _publishedTo == null
@@ -491,8 +567,15 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                         ),
                         OutlinedButton.icon(
                           onPressed: _clearFilters,
-                          icon: const Icon(Icons.filter_alt_off, size: 18, color: Color(0xFFE2E8F0)),
-                          label: const Text('Limpiar filtros', style: TextStyle(color: Color(0xFFE2E8F0))),
+                          icon: const Icon(
+                            Icons.filter_alt_off,
+                            size: 18,
+                            color: Color(0xFFE2E8F0),
+                          ),
+                          label: const Text(
+                            'Limpiar filtros',
+                            style: TextStyle(color: Color(0xFFE2E8F0)),
+                          ),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Color(0xFF334155)),
                             backgroundColor: const Color(0xFF0B1220),
@@ -514,7 +597,10 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                     child: SizedBox(
                       width: 28,
                       height: 28,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF60A5FA)),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Color(0xFF60A5FA),
+                      ),
                     ),
                   ),
                 ),
@@ -532,7 +618,10 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                       const Icon(Icons.error_outline, color: Color(0xFFFCA5A5)),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(_error!, style: const TextStyle(color: Color(0xFFFCA5A5))),
+                        child: Text(
+                          _error!,
+                          style: const TextStyle(color: Color(0xFFFCA5A5)),
+                        ),
                       ),
                       IconButton(
                         onPressed: () => setState(() => _error = null),
@@ -552,7 +641,8 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                     crossAxisCount: 1,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
-                    childAspectRatio: 3 / 2,
+                    // Más alto para evitar overflow cuando el contenido es largo
+                    childAspectRatio: 0.9,
                   ),
                   itemBuilder: (context, i) {
                     final c = _comunicados[i];
@@ -571,13 +661,25 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                   padding: const EdgeInsets.symmetric(vertical: 28),
                   child: Column(
                     children: [
-                      const Icon(Icons.calendar_today_outlined, size: 48, color: Color(0xFF64748B)),
+                      const Icon(
+                        Icons.calendar_today_outlined,
+                        size: 48,
+                        color: Color(0xFF64748B),
+                      ),
                       const SizedBox(height: 8),
-                      Text('No se encontraron comunicados',
-                          style: t.titleMedium?.copyWith(color: const Color(0xFFCBD5E1))),
+                      Text(
+                        'No se encontraron comunicados',
+                        style: t.titleMedium?.copyWith(
+                          color: const Color(0xFFCBD5E1),
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text('Intenta ajustar los filtros de búsqueda',
-                          style: t.bodySmall?.copyWith(color: const Color(0xFF94A3B8))),
+                      Text(
+                        'Intenta ajustar los filtros de búsqueda',
+                        style: t.bodySmall?.copyWith(
+                          color: const Color(0xFF94A3B8),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -590,7 +692,9 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _hasPrevious ? () => _fetchComunicados(_currentPage - 1) : null,
+                          onPressed: _hasPrevious
+                              ? () => _fetchComunicados(_currentPage - 1)
+                              : null,
                           icon: const Icon(Icons.chevron_left),
                           label: const Text('Anterior'),
                           style: OutlinedButton.styleFrom(
@@ -601,12 +705,16 @@ class _HistorialComunicadosScreenState extends State<HistorialComunicadosScreen>
                         ),
                       ),
                       const SizedBox(width: 8),
-                      Text('Página $_currentPage de $_totalPages',
-                          style: const TextStyle(color: Color(0xFF94A3B8))),
+                      Text(
+                        'Página $_currentPage de $_totalPages',
+                        style: const TextStyle(color: Color(0xFF94A3B8)),
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: _hasNext ? () => _fetchComunicados(_currentPage + 1) : null,
+                          onPressed: _hasNext
+                              ? () => _fetchComunicados(_currentPage + 1)
+                              : null,
                           icon: const Icon(Icons.chevron_right),
                           label: const Text('Siguiente'),
                           style: OutlinedButton.styleFrom(
@@ -662,8 +770,20 @@ class _FilterChipBox extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12)),
-                Text(value, style: const TextStyle(color: Color(0xFFE2E8F0), fontSize: 12)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 12,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: const TextStyle(
+                    color: Color(0xFFE2E8F0),
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
             if (hasValue && onClear != null) ...[
@@ -701,7 +821,10 @@ class _TextEntryBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(color: Color(0xFFCBD5E1), fontSize: 12),
+          ),
           const SizedBox(height: 6),
           TextField(
             decoration: InputDecoration(
@@ -717,7 +840,10 @@ class _TextEntryBox extends StatelessWidget {
                 borderSide: const BorderSide(color: Color(0xFF3B82F6)),
                 borderRadius: BorderRadius.circular(10),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 10,
+              ),
             ),
             style: const TextStyle(color: Color(0xFFE2E8F0)),
             onChanged: onChanged,
@@ -743,8 +869,12 @@ class _ComunicadoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isExpired = comunicado.expiresAt != null && comunicado.expiresAt!.isNotEmpty
-        ? DateTime.tryParse(comunicado.expiresAt!)?.isBefore(DateTime.now().toUtc()) ?? false
+    final isExpired =
+        comunicado.expiresAt != null && comunicado.expiresAt!.isNotEmpty
+        ? DateTime.tryParse(
+                comunicado.expiresAt!,
+              )?.isBefore(DateTime.now().toUtc()) ??
+              false
         : false;
     final authorName = comunicado.author?.fullName ?? 'Autor desconocido';
 
@@ -756,14 +886,17 @@ class _ComunicadoCard extends StatelessWidget {
           color: const Color(0xFF0A0F1A),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isExpired ? const Color(0xFFF59E0B).withOpacity(0.5) : const Color(0xFF1F2937),
+            color: isExpired
+                ? const Color(0xFFF59E0B).withOpacity(0.5)
+                : const Color(0xFF1F2937),
           ),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
           children: [
             // Portada
-            if (comunicado.portadaUrl != null && comunicado.portadaUrl!.isNotEmpty)
+            if (comunicado.portadaUrl != null &&
+                comunicado.portadaUrl!.isNotEmpty)
               Stack(
                 children: [
                   AspectRatio(
@@ -774,7 +907,10 @@ class _ComunicadoCard extends StatelessWidget {
                       errorBuilder: (_, __, ___) => Container(
                         color: const Color(0xFF111827),
                         child: const Center(
-                          child: Icon(Icons.image_not_supported_outlined, color: Color(0xFF64748B)),
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            color: Color(0xFF64748B),
+                          ),
                         ),
                       ),
                     ),
@@ -784,13 +920,22 @@ class _ComunicadoCard extends StatelessWidget {
                       top: 8,
                       right: 8,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFF59E0B),
                           borderRadius: BorderRadius.circular(999),
                         ),
-                        child: const Text('Expirado',
-                            style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                        child: const Text(
+                          'Expirado',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                 ],
@@ -835,16 +980,26 @@ class _ComunicadoCard extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _metaRow(icon: Icons.schedule, text: 'Publicado: ${formatDate(comunicado.publishedAt)}'),
+                        _metaRow(
+                          icon: Icons.schedule,
+                          text:
+                              'Publicado: ${formatDate(comunicado.publishedAt)}',
+                        ),
                         const SizedBox(height: 4),
-                        _metaRow(icon: Icons.person_outline, text: 'Por: $authorName'),
-                        if (comunicado.expiresAt != null && comunicado.expiresAt!.isNotEmpty) ...[
+                        _metaRow(
+                          icon: Icons.person_outline,
+                          text: 'Por: $authorName',
+                        ),
+                        if (comunicado.expiresAt != null &&
+                            comunicado.expiresAt!.isNotEmpty) ...[
                           const SizedBox(height: 4),
                           _metaRow(
                             icon: Icons.calendar_today_outlined,
                             text:
                                 '${isExpired ? "Expiró" : "Expira"}: ${formatDate(comunicado.expiresAt!)}',
-                            color: isExpired ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8),
+                            color: isExpired
+                                ? const Color(0xFFF59E0B)
+                                : const Color(0xFF94A3B8),
                           ),
                         ],
                       ],
@@ -860,12 +1015,22 @@ class _ComunicadoCard extends StatelessWidget {
     );
   }
 
-  Widget _metaRow({required IconData icon, required String text, Color color = const Color(0xFF94A3B8)}) {
+  Widget _metaRow({
+    required IconData icon,
+    required String text,
+    Color color = const Color(0xFF94A3B8),
+  }) {
     return Row(
       children: [
         Icon(icon, size: 14, color: color),
         const SizedBox(width: 6),
-        Expanded(child: Text(text, style: TextStyle(color: color, fontSize: 12), overflow: TextOverflow.ellipsis)),
+        Expanded(
+          child: Text(
+            text,
+            style: TextStyle(color: color, fontSize: 12),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
       ],
     );
   }
