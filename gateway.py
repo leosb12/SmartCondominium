@@ -4,9 +4,10 @@ import httpx
 
 app = FastAPI()
 
+# CORS GLOBAL
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # en prod poné tu dominio
+    allow_origins=["*"],  # en prod: ["https://smart-condominium-web.vercel.app"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -16,41 +17,66 @@ IDENTITY_URL = "http://localhost:8011"
 PLATE_IDENTITY_URL = "http://localhost:8012"
 
 
-@app.api_route("/identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS"])
+def filter_headers(headers: dict) -> dict:
+    """Quita headers que rompen CORS en proxys"""
+    excluded = {
+        "content-length",
+        "transfer-encoding",
+        "connection",
+        "keep-alive",
+        "proxy-authenticate",
+        "proxy-authorization",
+        "te",
+        "trailers",
+        "upgrade",
+        "host",
+    }
+    return {k: v for k, v in headers.items() if k.lower() not in excluded}
+
+
+@app.api_route(
+    "/identity/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+)
 async def identity_proxy(path: str, request: Request):
+
     if request.method == "OPTIONS":
-        return Response(status_code=200)
+        return Response(status_code=204)
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.request(
             method=request.method,
             url=f"{IDENTITY_URL}/{path}",
-            headers=dict(request.headers),
-            content=await request.body()
+            headers=filter_headers(dict(request.headers)),
+            content=await request.body(),
         )
 
     return Response(
         content=resp.content,
         status_code=resp.status_code,
-        headers=resp.headers
+        headers=filter_headers(dict(resp.headers)),
     )
 
 
-@app.api_route("/plate-identity/{path:path}", methods=["GET","POST","PUT","DELETE","PATCH","OPTIONS"])
+@app.api_route(
+    "/plate-identity/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+)
 async def plate_identity_proxy(path: str, request: Request):
+
     if request.method == "OPTIONS":
-        return Response(status_code=200)
+        return Response(status_code=204)
 
     async with httpx.AsyncClient(timeout=60.0) as client:
         resp = await client.request(
             method=request.method,
             url=f"{PLATE_IDENTITY_URL}/{path}",
-            headers=dict(request.headers),
-            content=await request.body()
+            headers=filter_headers(dict(request.headers)),
+            content=await request.body(),
         )
 
     return Response(
         content=resp.content,
         status_code=resp.status_code,
-        headers=resp.headers
+        headers=filter_headers(dict(resp.headers)),
     )
