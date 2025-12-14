@@ -7,7 +7,6 @@ const IDENTITY_API_BASE =
 
 export const identityApi = axios.create({
   baseURL: IDENTITY_API_BASE,
-  timeout: 20000,
 });
 
 // No necesitas headers especiales
