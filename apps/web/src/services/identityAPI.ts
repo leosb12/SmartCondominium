@@ -1,11 +1,13 @@
 import axios from "axios";
 
-// BASE_URL del microservicio de IA (NO el backend de Django)
-const IDENTITY_API_BASE = import.meta.env.VITE_IDENTITY_API_BASE || "https://daryl-draftable-overdogmatically.ngrok-free.dev";
+// BASE_URL apuntando AL GATEWAY (ruta identity)
+const IDENTITY_API_BASE =
+  import.meta.env.VITE_IDENTITY_API_BASE ||
+  "https://daryl-draftable-overdogmatically.ngrok-free.dev/identity";
 
 export const identityApi = axios.create({
   baseURL: IDENTITY_API_BASE,
 });
 
-// No necesitas headers personalizados para endpoints públicos del microservicio IA
+// No necesitas headers especiales
 export const getIdentityHeaders = () => ({});
