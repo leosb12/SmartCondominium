@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../core/api.dart';
-import '../core/token_storage.dart';
 import '../main.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -282,10 +281,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           keyboardType: TextInputType.emailAddress,
                           validator: (v) {
                             final re = RegExp(r'^[\w\.\-]+@[\w\.\-]+\.\w+$');
-                            if (v == null || v.trim().isEmpty)
+                            if (v == null || v.trim().isEmpty) {
                               return 'El correo es obligatorio';
-                            if (!re.hasMatch(v.trim()))
+                            }
+                            if (!re.hasMatch(v.trim())) {
                               return 'Correo inválido';
+                            }
                             return null;
                           },
                         ),

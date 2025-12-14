@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 
 import '../features/mfa/mfa_controller.dart';
 import '../features/mfa/mfa_repository.dart';
-import '../features/mfa/mfa_models.dart';
 
 import '../main.dart'; // o donde tengas definido Routes
 
@@ -58,39 +57,39 @@ class _Seguridad2FAScreenState extends State<Seguridad2FAScreen> {
     super.dispose();
   }
 
-  String _formatDate(DateTime date) {
-    // Formato manual para evitar problemas de localización
-    final weekdays = [
-      'Lunes',
-      'Martes',
-      'Miércoles',
-      'Jueves',
-      'Viernes',
-      'Sábado',
-      'Domingo',
-    ];
-    final months = [
-      'enero',
-      'febrero',
-      'marzo',
-      'abril',
-      'mayo',
-      'junio',
-      'julio',
-      'agosto',
-      'septiembre',
-      'octubre',
-      'noviembre',
-      'diciembre',
-    ];
-
-    final weekday = weekdays[date.weekday - 1];
-    final day = date.day.toString().padLeft(2, '0');
-    final month = months[date.month - 1];
-    final year = date.year;
-
-    return '$weekday, $day de $month de $year';
-  }
+  // String _formatDate(DateTime date) {
+  //   // Formato manual para evitar problemas de localización
+  //   final weekdays = [
+  //     'Lunes',
+  //     'Martes',
+  //     'Miércoles',
+  //     'Jueves',
+  //     'Viernes',
+  //     'Sábado',
+  //     'Domingo',
+  //   ];
+  //   final months = [
+  //     'enero',
+  //     'febrero',
+  //     'marzo',
+  //     'abril',
+  //     'mayo',
+  //     'junio',
+  //     'julio',
+  //     'agosto',
+  //     'septiembre',
+  //     'octubre',
+  //     'noviembre',
+  //     'diciembre',
+  //   ];
+  //
+  //   final weekday = weekdays[date.weekday - 1];
+  //   final day = date.day.toString().padLeft(2, '0');
+  //   final month = months[date.month - 1];
+  //   final year = date.year;
+  //
+  //   return '$weekday, $day de $month de $year';
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -849,7 +848,7 @@ class _Seguridad2FAScreenState extends State<Seguridad2FAScreen> {
                             onPressed: () => _copy(_currentSecret),
                             icon: const Icon(
                               Icons.copy,
-                              color: const Color(0xFF60A5FA),
+                              color: Color(0xFF60A5FA),
                             ),
                           ),
                         ],

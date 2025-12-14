@@ -188,7 +188,7 @@ class _ReservaScreenState extends State<ReservaScreen> {
       } else {
         _showSnack('Respuesta inesperada del servidor');
       }
-    } on dynamic catch (e) {
+    } catch (e) {
       if (!mounted) return;
       final msg = _friendlyError(e);
       _showDialog(title: 'No se pudo crear', message: msg);
@@ -306,7 +306,7 @@ class _ReservaScreenState extends State<ReservaScreen> {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<T>(
-          value: value,
+          initialValue: value,
           items: items,
           onChanged: onChanged,
           validator: validator,
@@ -340,7 +340,7 @@ class _ReservaScreenState extends State<ReservaScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final money = NumberFormat.simpleCurrency(decimalDigits: 2);
+    // final money = NumberFormat.simpleCurrency(decimalDigits: 2);
 
     return Scaffold(
       backgroundColor: const Color(0xFF000000),
@@ -598,7 +598,7 @@ class _ReservaScreenState extends State<ReservaScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       DropdownButtonFormField<_Hora>(
-                                        value: _selHoraIni,
+                                        initialValue: _selHoraIni,
                                         items: _horas
                                             .map(
                                               (h) => DropdownMenuItem(
@@ -698,7 +698,7 @@ class _ReservaScreenState extends State<ReservaScreen> {
                                       ),
                                       const SizedBox(height: 4),
                                       DropdownButtonFormField<_Hora>(
-                                        value: _selHoraFin,
+                                        initialValue: _selHoraFin,
                                         items: _horas
                                             .where(
                                               (h) =>
