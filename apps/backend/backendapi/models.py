@@ -22,6 +22,14 @@ class Propiedad(models.Model):
     id = models.BigAutoField(primary_key=True)
     nro_casa = models.TextField(null=True, blank=True)
     m2 = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    id_dueño = models.ForeignKey(
+        'historialComunicados.Profile',
+        db_column='id_dueño',
+        on_delete=models.DO_NOTHING,
+        related_name='propiedades',
+        null=True,
+        blank=True
+    )
 
     class Meta:
         db_table = "propiedad"

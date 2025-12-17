@@ -34,7 +34,7 @@ numpy==1.26.4
 opencv-python-headless==4.10.0.84
 orjson==3.10.7
 packaging==25.0
-pillow==10.2.0
+pillow==10.4.0
 postgrest==2.20.0
 psycopg==3.2.1
 psycopg-binary==3.2.1

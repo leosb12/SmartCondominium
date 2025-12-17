@@ -349,22 +349,19 @@ def mis_registros(request):
             return ok({"success": True, "data": {"autos": [], "mascotas": []}})
 
         # 2) Autos
-        # Preferimos leer desde Django ORM (mismo origen que /api/autos/), y dejamos Supabase como fallback.
+        # Usamos el serializer para incluir información del propietario
         autos = []
         try:
             from backendapi.registrarAuto.models import Auto as AutoModel
+            from backendapi.registrarAuto.serializers import AutoSerializer
 
-            qs = AutoModel.objects.select_related("propiedad").filter(propiedad_id__in=propiedad_ids)
-            autos = [
-                {
-                    "placa": a.placa,
-                    "modelo": a.modelo,
-                    "marca": a.marca,
-                    "propiedad_id": a.propiedad_id,
-                }
-                for a in qs
-            ]
-        except Exception:
+            qs = AutoModel.objects.select_related('propiedad', 'propiedad__id_dueño', 'estado').filter(propiedad_id__in=propiedad_ids)
+            serializer = AutoSerializer(qs, many=True)
+            autos = serializer.data
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            # Fallback a Supabase si falla el ORM
             try:
                 autos_res = (
                     supabase_admin.table("auto")

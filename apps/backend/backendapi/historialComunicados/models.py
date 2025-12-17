@@ -44,6 +44,7 @@ class Profile(models.Model):
     id = models.UUIDField(primary_key=True)
     first_name = models.TextField(blank=True, null=True)
     last_name = models.TextField(blank=True, null=True)
+    phone = models.TextField(blank=True, null=True)
 
     class Meta:
         managed = False
