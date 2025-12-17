@@ -322,16 +322,26 @@ def mis_registros(request):
 
     try:
         # 1) Propiedades del usuario
-        uh_res = (
-            supabase_admin.table("usuario_habitante")
-            .select("propiedad_id")
-            .eq("usuario_id", user_id)
-            .eq("estado", 1)
-            .execute()
-        )
+        try:
+            # En algunos esquemas el campo es estado_id (no estado)
+            uh_res = (
+                supabase_admin.table("usuario_habitante")
+                .select("propiedad_id")
+                .eq("usuario_id", user_id)
+                .eq("estado_id", 1)
+                .execute()
+            )
+        except Exception:
+            uh_res = (
+                supabase_admin.table("usuario_habitante")
+                .select("propiedad_id")
+                .eq("usuario_id", user_id)
+                .eq("estado", 1)
+                .execute()
+            )
         propiedad_ids = [
-            int(r.get("propiedad_id"))
-            for r in (uh_res.data or [])
+            r.get("propiedad_id")
+            for r in (getattr(uh_res, "data", None) or [])
             if r.get("propiedad_id") is not None
         ]
 
@@ -339,18 +349,27 @@ def mis_registros(request):
             return ok({"success": True, "data": {"autos": [], "mascotas": []}})
 
         # 2) Autos
-        autos_res = (
-            supabase_admin.table("auto")
-            .select("placa,modelo,marca,propiedad_id")
-            .in_("propiedad_id", propiedad_ids)
-            .execute()
-        )
-        autos_raw = autos_res.data or []
+        try:
+            autos_res = (
+                supabase_admin.table("auto")
+                .select("placa,modelo,marca,propiedad_id")
+                .in_("propiedad_id", propiedad_ids)
+                .execute()
+            )
+            autos_raw = getattr(autos_res, "data", None) or []
+        except Exception:
+            autos_res = (
+                supabase_admin.table("auto")
+                .select("*")
+                .in_("propiedad_id", propiedad_ids)
+                .execute()
+            )
+            autos_raw = getattr(autos_res, "data", None) or []
         autos = [
             {
-                "placa": a.get("placa"),
-                "modelo": a.get("modelo"),
-                "marca": a.get("marca"),
+                "placa": a.get("placa") or a.get("license_plate") or a.get("patente"),
+                "modelo": a.get("modelo") or a.get("model"),
+                "marca": a.get("marca") or a.get("brand"),
                 "propiedad_id": a.get("propiedad_id"),
             }
             for a in autos_raw
@@ -365,7 +384,7 @@ def mis_registros(request):
                 .in_("propiedad_id", propiedad_ids)
                 .execute()
             )
-            mascotas_raw = mascotas_res.data or []
+            mascotas_raw = getattr(mascotas_res, "data", None) or []
         except Exception:
             mascotas_res = (
                 supabase_admin.table("mascota")
@@ -373,7 +392,7 @@ def mis_registros(request):
                 .in_("propiedad_id", propiedad_ids)
                 .execute()
             )
-            mascotas_raw = mascotas_res.data or []
+            mascotas_raw = getattr(mascotas_res, "data", None) or []
 
         tipo_ids = sorted({m.get("tipo_mascota_id") for m in mascotas_raw if m.get("tipo_mascota_id")})
         tipos_by_id = {}
@@ -385,7 +404,7 @@ def mis_registros(request):
                     .in_("id", tipo_ids)
                     .execute()
                 )
-                for t in (tipos_res.data or []):
+                for t in (getattr(tipos_res, "data", None) or []):
                     if t.get("id") is not None:
                         tipos_by_id[t.get("id")] = {"id": t.get("id"), "nombre": t.get("nombre")}
             except Exception:
@@ -403,6 +422,8 @@ def mis_registros(request):
 
         return ok({"success": True, "data": {"autos": autos, "mascotas": mascotas}})
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return bad(f"Excepción en /mis-registros: {str(e)}", 500)
 
 @csrf_exempt
