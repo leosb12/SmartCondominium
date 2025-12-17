@@ -1,3 +1,4 @@
+from django.db import models
 from django.db.models import TextField
 from django.db.models.functions import Cast
 from rest_framework import generics

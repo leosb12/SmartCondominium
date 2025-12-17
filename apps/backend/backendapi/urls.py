@@ -14,6 +14,7 @@ urlpatterns = [
     path("forgot-password/", views.forgot_password, name="forgot_password"),
     path("reset-password/", views.reset_password, name="reset_password"),
     path("me/", views.me, name="me"),
+    path("mis-registros/", views.mis_registros, name="mis_registros"),
 
     # Endpoints REST
     path("", include(router.urls)),

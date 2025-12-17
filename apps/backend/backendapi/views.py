@@ -12,6 +12,8 @@ from rest_framework.response import Response
 
 from core.supabase_client import supabase, supabase_admin  # anon + service role
 
+from backendapi.roles.auth_helpers import require_auth
+
 from .models import TipoMulta, Multa, Propiedad, CargoMulta
 from .serializers import (
     TipoMultaSerializer,
@@ -292,6 +294,116 @@ def me(request):
         })
     except Exception as e:
         return bad(f"Excepción en /me: {str(e)}", 500)
+
+
+@csrf_exempt
+@require_auth
+def mis_registros(request):
+    """
+    GET /api/mis-registros/
+    Devuelve los vehículos (auto) y mascotas (mascota) asociados a las propiedades
+    del usuario logueado (usuario_habitante.estado=1).
+
+    Respuesta:
+      {
+        "success": true,
+        "data": {
+          "autos": [{"placa": "...", "modelo": "...", "marca": "...", "propiedad_id": 1}],
+          "mascotas": [{"id": 1, "nombre": "...", "tipo": {"id": 1, "nombre": "Perro"}, "propiedad_id": 1}]
+        }
+      }
+    """
+    if request.method != "GET":
+        return bad("Método no permitido", 405)
+
+    user_id = getattr(request, "user_id", None)
+    if not user_id:
+        return bad("Token de autenticación requerido o inválido", 401)
+
+    try:
+        # 1) Propiedades del usuario
+        uh_res = (
+            supabase_admin.table("usuario_habitante")
+            .select("propiedad_id")
+            .eq("usuario_id", user_id)
+            .eq("estado", 1)
+            .execute()
+        )
+        propiedad_ids = [
+            int(r.get("propiedad_id"))
+            for r in (uh_res.data or [])
+            if r.get("propiedad_id") is not None
+        ]
+
+        if not propiedad_ids:
+            return ok({"success": True, "data": {"autos": [], "mascotas": []}})
+
+        # 2) Autos
+        autos_res = (
+            supabase_admin.table("auto")
+            .select("placa,modelo,marca,propiedad_id")
+            .in_("propiedad_id", propiedad_ids)
+            .execute()
+        )
+        autos_raw = autos_res.data or []
+        autos = [
+            {
+                "placa": a.get("placa"),
+                "modelo": a.get("modelo"),
+                "marca": a.get("marca"),
+                "propiedad_id": a.get("propiedad_id"),
+            }
+            for a in autos_raw
+        ]
+
+        # 3) Mascotas (best-effort; si no existe tipo_mascota_id, devolvemos sin 'tipo')
+        mascotas_raw = []
+        try:
+            mascotas_res = (
+                supabase_admin.table("mascota")
+                .select("id,nombre,propiedad_id,tipo_mascota_id")
+                .in_("propiedad_id", propiedad_ids)
+                .execute()
+            )
+            mascotas_raw = mascotas_res.data or []
+        except Exception:
+            mascotas_res = (
+                supabase_admin.table("mascota")
+                .select("*")
+                .in_("propiedad_id", propiedad_ids)
+                .execute()
+            )
+            mascotas_raw = mascotas_res.data or []
+
+        tipo_ids = sorted({m.get("tipo_mascota_id") for m in mascotas_raw if m.get("tipo_mascota_id")})
+        tipos_by_id = {}
+        if tipo_ids:
+            try:
+                tipos_res = (
+                    supabase_admin.table("tipo_mascota")
+                    .select("id,nombre")
+                    .in_("id", tipo_ids)
+                    .execute()
+                )
+                for t in (tipos_res.data or []):
+                    if t.get("id") is not None:
+                        tipos_by_id[t.get("id")] = {"id": t.get("id"), "nombre": t.get("nombre")}
+            except Exception:
+                tipos_by_id = {}
+
+        mascotas = []
+        for m in mascotas_raw:
+            tipo_id = m.get("tipo_mascota_id")
+            mascotas.append({
+                "id": m.get("id"),
+                "nombre": m.get("nombre") or m.get("name"),
+                "tipo": tipos_by_id.get(tipo_id),
+                "propiedad_id": m.get("propiedad_id"),
+            })
+
+        return ok({"success": True, "data": {"autos": autos, "mascotas": mascotas}})
+    except Exception as e:
+        return bad(f"Excepción en /mis-registros: {str(e)}", 500)
 
 @csrf_exempt
 def users(request):
