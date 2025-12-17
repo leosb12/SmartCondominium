@@ -349,31 +349,48 @@ def mis_registros(request):
             return ok({"success": True, "data": {"autos": [], "mascotas": []}})
 
         # 2) Autos
+        # Preferimos leer desde Django ORM (mismo origen que /api/autos/), y dejamos Supabase como fallback.
+        autos = []
         try:
-            autos_res = (
-                supabase_admin.table("auto")
-                .select("placa,modelo,marca,propiedad_id")
-                .in_("propiedad_id", propiedad_ids)
-                .execute()
-            )
-            autos_raw = getattr(autos_res, "data", None) or []
+            from backendapi.registrarAuto.models import Auto as AutoModel
+
+            qs = AutoModel.objects.select_related("propiedad").filter(propiedad_id__in=propiedad_ids)
+            autos = [
+                {
+                    "placa": a.placa,
+                    "modelo": a.modelo,
+                    "marca": a.marca,
+                    "propiedad_id": a.propiedad_id,
+                }
+                for a in qs
+            ]
         except Exception:
-            autos_res = (
-                supabase_admin.table("auto")
-                .select("*")
-                .in_("propiedad_id", propiedad_ids)
-                .execute()
-            )
-            autos_raw = getattr(autos_res, "data", None) or []
-        autos = [
-            {
-                "placa": a.get("placa") or a.get("license_plate") or a.get("patente"),
-                "modelo": a.get("modelo") or a.get("model"),
-                "marca": a.get("marca") or a.get("brand"),
-                "propiedad_id": a.get("propiedad_id"),
-            }
-            for a in autos_raw
-        ]
+            try:
+                autos_res = (
+                    supabase_admin.table("auto")
+                    .select("placa,modelo,marca,propiedad_id")
+                    .in_("propiedad_id", propiedad_ids)
+                    .execute()
+                )
+                autos_raw = getattr(autos_res, "data", None) or []
+            except Exception:
+                autos_res = (
+                    supabase_admin.table("auto")
+                    .select("*")
+                    .in_("propiedad_id", propiedad_ids)
+                    .execute()
+                )
+                autos_raw = getattr(autos_res, "data", None) or []
+
+            autos = [
+                {
+                    "placa": a.get("placa") or a.get("license_plate") or a.get("patente"),
+                    "modelo": a.get("modelo") or a.get("model"),
+                    "marca": a.get("marca") or a.get("brand"),
+                    "propiedad_id": a.get("propiedad_id"),
+                }
+                for a in autos_raw
+            ]
 
         # 3) Mascotas (best-effort; si no existe tipo_mascota_id, devolvemos sin 'tipo')
         mascotas_raw = []
