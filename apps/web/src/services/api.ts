@@ -1,6 +1,7 @@
 import axios from "axios";
 
-// Lee la URL base desde la variable de entorno
+// Lee la URL base desde la variable de entorno para producción
+// En local usa el gateway en puerto 8000
 const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8001";
 
 export const api = axios.create({

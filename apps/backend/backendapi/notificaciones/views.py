@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from datetime import datetime, timedelta, timezone
 
 from django.http import JsonResponse
@@ -176,6 +177,8 @@ def process_pending(request):
 
     pending = fetch_pending(limit=limit)
     processed = []
+    email_count = 0
+    
     for n in pending:
         notif_id = n.get("id")
         if not notif_id:
@@ -193,11 +196,17 @@ def process_pending(request):
         title, html = event_texts(tipo_evento, referencia_id or 0)
         try:
             if canal == "email":
+                # Rate limiting: Resend permite máximo 2 requests/segundo
+                # Esperamos 0.6 segundos entre cada email (1.67 emails/segundo)
+                if email_count > 0:
+                    time.sleep(0.6)
+                
                 email = get_user_email(usuario_id)
                 if not email:
                     raise RuntimeError("Usuario sin email")
                 status = send_email(email, f"[SmartCondo] {title}", html)
                 ok_flag = (status == 200)  # Resend devuelve 200
+                email_count += 1
             elif canal == "push":
                 tokens = get_user_tokens(usuario_id)
                 if not tokens:

@@ -321,9 +321,13 @@ def mis_registros(request):
         return bad("Token de autenticación requerido o inválido", 401)
 
     try:
-        # 1) Propiedades del usuario
+        # 1) Obtener propiedades del usuario de dos formas:
+        #    a) Como habitante en usuario_habitante
+        #    b) Como dueño directo en propiedad.id_dueño
+        propiedad_ids = []
+        
+        # Método 1: usuario_habitante
         try:
-            # En algunos esquemas el campo es estado_id (no estado)
             uh_res = (
                 supabase_admin.table("usuario_habitante")
                 .select("propiedad_id")
@@ -332,18 +336,45 @@ def mis_registros(request):
                 .execute()
             )
         except Exception:
-            uh_res = (
-                supabase_admin.table("usuario_habitante")
-                .select("propiedad_id")
-                .eq("usuario_id", user_id)
-                .eq("estado", 1)
+            try:
+                uh_res = (
+                    supabase_admin.table("usuario_habitante")
+                    .select("propiedad_id")
+                    .eq("usuario_id", user_id)
+                    .eq("estado", 1)
+                    .execute()
+                )
+            except Exception:
+                uh_res = None
+        
+        if uh_res:
+            propiedad_ids.extend([
+                r.get("propiedad_id")
+                for r in (getattr(uh_res, "data", None) or [])
+                if r.get("propiedad_id") is not None
+            ])
+        
+        # Método 2: Buscar directamente como dueño en la tabla propiedad
+        try:
+            prop_res = (
+                supabase_admin.table("propiedad")
+                .select("id")
+                .eq("id_dueño", user_id)
                 .execute()
             )
-        propiedad_ids = [
-            r.get("propiedad_id")
-            for r in (getattr(uh_res, "data", None) or [])
-            if r.get("propiedad_id") is not None
-        ]
+            propiedad_ids.extend([
+                r.get("id")
+                for r in (getattr(prop_res, "data", None) or [])
+                if r.get("id") is not None
+            ])
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            # Si falla, continuamos con las propiedades de usuario_habitante
+            pass
+        
+        # Eliminar duplicados
+        propiedad_ids = list(set(propiedad_ids))
 
         if not propiedad_ids:
             return ok({"success": True, "data": {"autos": [], "mascotas": []}})

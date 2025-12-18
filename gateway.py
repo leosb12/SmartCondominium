@@ -15,6 +15,7 @@ app.add_middleware(
 
 IDENTITY_URL = "http://localhost:8011"
 PLATE_IDENTITY_URL = "http://localhost:8012"
+BACKEND_URL = "http://localhost:8001"
 
 
 def filter_headers(headers: dict) -> dict:
@@ -71,6 +72,31 @@ async def plate_identity_proxy(path: str, request: Request):
         resp = await client.request(
             method=request.method,
             url=f"{PLATE_IDENTITY_URL}/{path}",
+            headers=filter_headers(dict(request.headers)),
+            content=await request.body(),
+        )
+
+    return Response(
+        content=resp.content,
+        status_code=resp.status_code,
+        headers=filter_headers(dict(resp.headers)),
+    )
+
+
+@app.api_route(
+    "/api/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+)
+async def backend_proxy(path: str, request: Request):
+    """Proxy para el backend Django principal"""
+    
+    if request.method == "OPTIONS":
+        return Response(status_code=204)
+
+    async with httpx.AsyncClient(timeout=60.0) as client:
+        resp = await client.request(
+            method=request.method,
+            url=f"{BACKEND_URL}/api/{path}",
             headers=filter_headers(dict(request.headers)),
             content=await request.body(),
         )
