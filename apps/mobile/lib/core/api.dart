@@ -164,4 +164,8 @@ class Api {
       data: {'token': token, 'plataforma': plataforma},
     );
   }
+
+  // ---------- RESIDENTE: MIS REGISTROS ----------
+  /// Lista de solo lectura (autos y mascotas) asociadas al usuario logueado.
+  Future<Response> getMisRegistros() => dio.get('/mis-registros/');
 }

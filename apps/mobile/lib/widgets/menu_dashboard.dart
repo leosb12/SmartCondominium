@@ -83,7 +83,13 @@ class _MenuDashboardState extends State<MenuDashboard> {
 
   void _go(String route) {
     Navigator.pop(context); // cierra el drawer
-    Navigator.pushReplacementNamed(context, route);
+    // Para "Mis Registros", usar push normal en lugar de pushReplacement
+    // para permitir volver atrás
+    if (route == Routes.misRegistros) {
+      Navigator.pushNamed(context, route);
+    } else {
+      Navigator.pushReplacementNamed(context, route);
+    }
   }
 
   @override
@@ -94,6 +100,12 @@ class _MenuDashboardState extends State<MenuDashboard> {
         label: 'Dashboard',
         icon: Icons.home_outlined,
         color: const Color(0xFF60a5fa),
+      ),
+      (
+        route: Routes.misRegistros,
+        label: 'Mis Registros',
+        icon: Icons.badge_outlined,
+        color: const Color(0xFF22c55e),
       ),
       (
         route: Routes.areasComunes,

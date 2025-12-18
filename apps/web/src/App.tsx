@@ -21,6 +21,7 @@ import Mensajes from "./pages/Mensajes";
 import AreasComunes from "./pages/AreasComunes";
 import RegistrarAreaComun from "./pages/RegistrarAreaComun";
 import MisReservas from "./pages/MisReservas";
+import MisRegistros from "./pages/MisRegistros";
 import Mantenimiento from "./pages/Mantenimiento";
 import ProgramarPreventivo from "./pages/ProgramarPreventivo";
 import AsignarTareas from "./pages/AsignarTareas";
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="/areas-comunes" element={<AreasComunes />} />
           <Route path="/registrar-area-comun" element={<RegistrarAreaComun />} />
           <Route path="/mis-reservas" element={<MisReservas />} />
+          <Route path="/mis-registros" element={<MisRegistros />} />
           <Route path="/mantenimiento" element={<Mantenimiento />} />
           <Route path="/mantenimiento/programar-preventivo" element={<ProgramarPreventivo />} />
           <Route path="/mantenimiento/asignar-tareas" element={<AsignarTareas />} />

@@ -8,6 +8,7 @@ import {
   Wrench,
   BarChart3,
   Shield,
+  Car,
   X,
   LogOut,
   ShieldCheck,
@@ -82,6 +83,7 @@ const MenuDashboard: React.FC<MenuDashboardProps> = ({
 
   const items = [
     { to: "/dashboard", label: "Dashboard", icon: <Home size={20} /> },
+    { to: "/mis-registros", label: "Mis Registros", icon: <Car size={20} /> },
     { to: "/residentes", label: "Residentes", icon: <Users size={20} /> },
     { to: "/areas-comunes", label: "Áreas Comunes", icon: <Building size={20} /> },
     { to: "/finanzas", label: "Finanzas", icon: <DollarSign size={20} /> },

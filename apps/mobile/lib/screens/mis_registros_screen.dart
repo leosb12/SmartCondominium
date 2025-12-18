@@ -52,6 +52,11 @@ class _MisRegistrosScreenState extends State<MisRegistrosScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF111827),
         foregroundColor: Colors.white,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(),
+          tooltip: 'Volver',
+        ),
         title: const Text('Mis Vehículos'),
         actions: [
           IconButton(

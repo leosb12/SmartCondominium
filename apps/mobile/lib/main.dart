@@ -16,6 +16,7 @@ import 'screens/comunicacion_screen.dart';
 import 'screens/mensajes_screen.dart';
 import 'screens/historial_comunicados_screen.dart';
 import 'screens/mfa_screen.dart';
+import 'screens/mis_registros_screen.dart';
 
 import 'package:dio/dio.dart'; // 👈 Necesario para manejar las excepciones de Dio
 
@@ -34,6 +35,7 @@ class Routes {
   static const seguridad = '/seguridad';
   static const authSeg = '/autenticacion-seguridad';
   static const comunicacionHistorial = '/comunicacion/historial';
+  static const misRegistros = '/mis-registros';
   // Subrutas de Comunicación
   static const comunicacionMensajes = '/comunicacion/mensajes';
 }
@@ -97,6 +99,7 @@ class App extends StatelessWidget {
         Routes.seguridad: (_) => const PlaceholderScreen(title: 'Seguridad'),
         Routes.authSeg: (_) => const Seguridad2FAScreen(),
         Routes.comunicacionHistorial: (_) => HistorialComunicadosScreen(),
+        Routes.misRegistros: (_) => const MisRegistrosScreen(),
       },
     );
   }
